@@ -1,0 +1,89 @@
+% Fig. 9 - T-SCMA Per-Subframe Symbol Structure (NPUSCH Format 1)
+% Companion to Fig. 8 (multiplexing pattern). Single-lane view.
+% Compile: pdflatex fig9_tscma_symbol.tex
+\documentclass[border=8pt]{standalone}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, patterns}
+
+\begin{document}
+
+\definecolor{cb1}{RGB}{180,140,220}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    font=\footnotesize,
+    datacell/.style={rectangle, minimum width=0.55cm, minimum height=0.7cm,
+                     inner sep=0pt, draw=black!50, line width=0.5pt,
+                     fill=cb1!40},
+    dmrscell/.style={rectangle, minimum width=0.55cm, minimum height=0.7cm,
+                     inner sep=0pt, draw=black!70, line width=0.7pt,
+                     fill=cb1!55, pattern=north east lines, pattern color=black!60},
+    label/.style={font=\scriptsize, text=black!70},
+    legend/.style={font=\scriptsize, text=black!70, anchor=west},
+]
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\bfseries] at (3.85, 1.5)
+    {T-SCMA Per-Subframe Symbol Structure};
+\node[font=\scriptsize, text=black!60] at (3.85, 1.05)
+    {NPUSCH Format~1: 14 OFDM symbols, 2 slots of 7, single 15~kHz subcarrier};
+
+% ============================================================
+% SLOT LABELS (top)
+% ============================================================
+\node[font=\scriptsize\bfseries, text=black!75]
+    at ({(0+6)*0.55/2}, 0.6) {Slot 1};
+\node[font=\scriptsize\bfseries, text=black!75]
+    at ({(7+13)*0.55/2}, 0.6) {Slot 2};
+
+% Slot boundary line (separates symbol 6 from 7)
+\draw[thin, black!45, dashed] ({6.5*0.55}, 0.85) -- ({6.5*0.55}, -0.55);
+
+% ============================================================
+% 14 OFDM SYMBOL CELLS (data positions and DMRS at 3, 10)
+% ============================================================
+% data: 0,1,2 / 4,5,6 / 7,8,9 / 11,12,13
+\foreach \i in {0, 1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13} {
+    \node[datacell] at ({\i*0.55 + 0.275}, 0) {};
+}
+% DMRS: 3, 10
+\node[dmrscell] at ({3*0.55 + 0.275}, 0) {};
+\node[dmrscell] at ({10*0.55 + 0.275}, 0) {};
+
+% ============================================================
+% SYMBOL INDICES (below)
+% ============================================================
+\foreach \i in {0,...,13} {
+    \node[font=\tiny, text=black!65]
+        at ({\i*0.55 + 0.275}, -0.45) {\i};
+}
+\node[label, anchor=north] at ({6.5*0.55}, -0.85) {OFDM symbol index};
+
+% ============================================================
+% LEGEND (right side)
+% ============================================================
+\node[draw=black!35, fill=black!2, rounded corners=2pt, inner sep=5pt,
+      anchor=north west, font=\scriptsize, align=left]
+    at (8.40, 0.60) {%
+    \tikz[baseline=-2pt]{\node[datacell, minimum width=0.4cm,
+                               minimum height=0.30cm] at (0,0) {};} \, Data symbol\\[3pt]
+    \tikz[baseline=-2pt]{\node[dmrscell, minimum width=0.4cm,
+                               minimum height=0.30cm] at (0,0) {};} \, DMRS pilot
+    (symbols 3 and 10)
+};
+
+% ============================================================
+% CROSS-REFERENCE NOTE (under the lane)
+% ============================================================
+\node[font=\scriptsize, text=black!60, anchor=north,
+      text width=8cm, align=center]
+    at ({6.5*0.55}, -1.40)
+    {Same structure applies to every active cell of Fig.~8;\\
+     here illustrated with the colour of UE$_1$~/~CB$_1$ as example.};
+
+\end{tikzpicture}
+\end{document}

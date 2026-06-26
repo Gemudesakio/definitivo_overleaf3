@@ -1,0 +1,83 @@
+\chapter{INTRODUCCIÓN}
+
+% ------------------------------------------------------------
+\section{Contexto, planteamiento del problema y justificación}
+% ------------------------------------------------------------
+
+En los últimos años, el Internet de las Cosas (IoT, \textit{Internet of Things}) ha cambiado
+la manera en que se usan las redes de comunicaciones. A diferencia del tráfico tradicional,
+donde unos pocos usuarios generan grandes volúmenes de datos, las aplicaciones IoT se
+caracterizan por millones de dispositivos que envían paquetes pequeños de forma esporádica
+y sin coordinación previa~\cite{ref1, ref2}. Se estima que para 2029 habrá más de 29 mil
+millones de dispositivos IoT conectados, impulsados por casos de uso como ciudades
+inteligentes, agricultura de precisión, monitoreo ambiental y transporte
+conectado~\cite{ref3}. Este crecimiento plantea un reto nuevo para las redes celulares,
+porque los mecanismos de acceso pensados para comunicaciones humanas no fueron diseñados
+para soportar densidades tan altas de dispositivos.
+
+Para atender este escenario, el proyecto 3GPP (\textit{3rd Generation Partnership Project})
+introdujo en su Release 13 el Internet de las Cosas de Banda Estrecha (NB-IoT,
+\textit{Narrowband Internet of Things}), una interfaz de
+acceso radio optimizada para comunicaciones tipo máquina (MTC, \textit{Machine-Type
+Communication}), que opera en espectro licenciado con un ancho de banda de
+180\,kHz~\cite{ref3, ref7}. Aunque NB-IoT permite soportar una gran cantidad de dispositivos
+de baja complejidad, su canal físico de acceso aleatorio (NPRACH, \textit{Narrowband Physical
+Random Access Channel}) dispone de solo 48 preámbulos ortogonales por oportunidad de
+acceso~\cite{ref7}, lo que se vuelve un cuello de botella cuando cientos o miles de
+dispositivos intentan conectarse al mismo tiempo. En esas condiciones, la probabilidad de
+que dos o más dispositivos escojan el mismo preámbulo crece rápidamente, se producen
+colisiones y aparecen retransmisiones que aumentan el retardo de acceso y reducen la
+capacidad efectiva del sistema~\cite{ref4, ref5}. La literatura coincide en que los
+esquemas de acceso ortogonal convencional no son suficientes para soportar las densidades
+de dispositivos que se proyectan en escenarios IoT masivos~\cite{ref4, ref5}, y por eso el
+problema del acceso aleatorio en NB-IoT sigue siendo un tema activo de investigación.
+
+A esta limitación de capacidad se suma una limitación de cobertura. La infraestructura
+celular terrestre llega principalmente a zonas urbanas, dejando sin conectividad confiable
+a regiones rurales, marítimas y remotas, que son justamente donde muchas aplicaciones IoT
+operan de forma permanente~\cite{ref3}. Aplicaciones como el monitoreo de cultivos, el
+rastreo de flotas en zonas marítimas, la vigilancia ambiental en áreas protegidas o el
+soporte a comunidades rurales dependen de que la red sea capaz de atender muchos
+dispositivos con bajo consumo y cobertura global, algo que solo se logra combinando
+tecnologías de baja potencia como NB-IoT con infraestructura satelital~\cite{ref3, ref13}.
+Esta brecha ha motivado el uso de redes no terrestres (NTN, \textit{Non-Terrestrial
+Networks}) y, en particular, de constelaciones de satélites de órbita baja (LEO,
+\textit{Low Earth Orbit}), que ofrecen una pérdida de trayectoria mucho menor que los
+satélites geoestacionarios y un retardo de ida y vuelta de entre 2 y 20\,ms, apropiado
+para aplicaciones IoT de baja latencia~\cite{ref3, ref6}. Sin embargo, el canal LEO
+introduce efectos que no existen en enlaces terrestres ---desplazamiento Doppler, retardo
+variable y ventanas de visibilidad cortas--- que afectan directamente el procedimiento de
+acceso aleatorio y pueden empeorar el problema de colisiones~\cite{ref6, ref13}.
+
+Para atacar el cuello de botella del acceso, en la literatura reciente se han propuesto
+esquemas de acceso aleatorio no ortogonal (NORA, \textit{Non-Orthogonal Random Access}) que,
+en lugar de descartar a los dispositivos colisionados, intentan recuperarlos aprovechando
+las diferencias en potencia recibida o en tiempo de llegada de sus
+señales~\cite{ref4, ref5}. Variantes más avanzadas, como SARA
+(\textit{Sparse Code Multiple Access-Applied Random Access}), combinan NORA con el acceso
+múltiple por código escaso (SCMA, \textit{Sparse Code Multiple Access}) para separar
+dispositivos usando \textit{codebooks} escasos y un detector basado en el algoritmo de paso
+de mensajes (MPA, \textit{Message Passing Algorithm})~\cite{ref10, ref17}.
+Estos esquemas han logrado mejoras de más del 30\,\% en capacidad en entornos terrestres,
+pero su comportamiento bajo un canal satelital LEO todavía no se ha estudiado a profundidad
+y no se puede deducir directamente de los resultados publicados para escenarios terrestres,
+porque los efectos del canal y las ráfagas de acceso que se producen durante la ventana de
+visibilidad del satélite pueden cambiar de forma importante el desempeño del esquema.
+
+A lo anterior se suma un tercer aspecto crítico: la detección de colisiones, que
+condiciona el desempeño de cualquier esquema no ortogonal. Los trabajos recientes sobre
+detección basada en aprendizaje automático~\cite{ref20}, muestran que la precisión del
+detector influye directamente sobre la capacidad efectiva del sistema, pero pocos estudios
+han evaluado cómo se comporta esta relación cuando el canal es el de un enlace LEO.
+Entender esta dependencia permite identificar qué tan robusto puede ser un esquema no
+ortogonal de este tipo frente a errores de detección y bajo qué condiciones sigue valiendo
+la pena usarlo.
+
+A partir de este panorama se delimita el problema que aborda este trabajo: no está claro
+cuánta capacidad del canal de acceso aleatorio se puede alcanzar al aplicar esquemas no
+ortogonales como SARA sobre una red NB-IoT que usa satélites LEO como infraestructura de
+acceso, ni cómo se degrada esa capacidad cuando aparecen efectos propios del enlace
+satelital o errores en la detección de colisiones. Caracterizar este comportamiento aporta
+información útil tanto para el diseño de futuras redes IoT no terrestres como para
+orientar trabajos posteriores sobre mecanismos de acceso en NTN, un tema que la Release 18
+del 3GPP identifica como un problema abierto~\cite{ref13}.

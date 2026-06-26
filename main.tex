@@ -1,0 +1,50 @@
+% ============================================================
+%  DOCUMENTO DEFINITIVO (unificado)
+%  Capacidad del canal de acceso aleatorio no ortogonal de
+%  redes 5G NB-IoT soportadas en redes satelitales de órbita baja
+%
+%  Estructura:
+%    1. Introducción            (del documento general)
+%    2. Marco Teórico           (del documento general)
+%    3. Diseño del Sistema      (abre con metodología de desarrollo; incluye
+%                                requerimientos y el plan de evaluación)
+%    4. Implementación          (capítulo nuevo)
+%    5. Resultados y Análisis   (capítulo nuevo)
+%
+%  Nomenclatura unificada: Legacy / CRACS-R / CRACS-T.
+%  Compilación: pdflatex -> bibtex -> pdflatex -> pdflatex
+% ============================================================
+\documentclass[12pt, oneside, letterpaper]{report}
+
+\input{preamble.tex}
+
+\title{Capacidad del canal de acceso aleatorio no ortogonal de redes 5G NB-IoT
+       soportadas en redes satelitales de órbita baja}
+\author{Jose Julian Garzon Males \and Luis Eduardo Rivera Martos}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\newpage
+
+% --- Cuerpo del documento ---
+\input{ch01_introduccion.tex}
+\input{ch02_marco_teorico.tex}
+\input{ch06_diseno.tex}
+\input{ch08_implementacion.tex}
+\input{ch09_resultados.tex}
+\input{ch10_conclusiones.tex}
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Referencias}
+\bibliographystyle{IEEEtran}
+\bibliography{tesis,referencias}
+
+\end{document}

@@ -1,0 +1,219 @@
+% Fig. 8 - T-SCMA Multiplexing Pattern (UEs x subframes view, IEEE-style)
+% Compile: pdflatex fig8_tscma_design.tex
+\documentclass[border=8pt]{standalone}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, patterns, decorations.pathreplacing}
+
+\begin{document}
+
+\definecolor{cb1}{RGB}{180,140,220}
+\definecolor{cb2}{RGB}{240,120,180}
+\definecolor{cb3}{RGB}{255,170,80}
+\definecolor{cb4}{RGB}{220,200,90}
+\definecolor{cb5}{RGB}{120,200,120}
+\definecolor{cb6}{RGB}{120,150,230}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    font=\footnotesize,
+    cellbase/.style={rectangle, minimum width=1.6cm, minimum height=0.6cm,
+                     inner sep=0pt, draw=black!50, line width=0.5pt},
+    silent/.style={cellbase, fill=black!4, font=\tiny, text=black!40,
+                   align=center},
+    uelabel/.style={rectangle, rounded corners=2pt, minimum width=1.95cm,
+                    minimum height=0.6cm, font=\scriptsize\bfseries,
+                    align=center, draw=black!45, line width=0.4pt},
+    columnhead/.style={font=\scriptsize\bfseries, text=black!75},
+    rowdmrs/.style={pattern=north east lines, pattern color=black!55},
+    callout/.style={draw=black!35, fill=black!2, rounded corners=2pt,
+                    inner sep=5pt, font=\scriptsize, align=left},
+]
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\bfseries] at (-1, 1.0)
+    {T-SCMA Multiplexing Pattern};
+\node[font=\scriptsize, text=black!60] at (-1, 0.5)
+    {$K=6$ codebooks over $N=4$ subframes on a single 15~kHz subcarrier
+     (overloading $K/N = 150\%$)};
+
+% ============================================================
+% COLUMN HEADERS (subframes)
+% ============================================================
+\foreach \i/\x in {1/-3.05, 2/-1.4, 3/0.25, 4/1.9} {
+    \node[columnhead] at (\x, -0.2) {Subframe \i};
+}
+
+% ============================================================
+% ROW LABELS (UE / CB)
+% ============================================================
+\foreach \i/\y/\col in {1/-1.0/cb1, 2/-1.65/cb2, 3/-2.30/cb3,
+                         4/-2.95/cb4, 5/-3.60/cb5, 6/-4.25/cb6} {
+    \node[uelabel, fill=\col!25] at (-5.0, \y) {UE$_\i$ / CB$_\i$};
+}
+
+% ============================================================
+% GRID HELPER MACROS (one cell per (row, col))
+% Active cell  : colored rectangle + DMRS stripe inside
+% Silent cell  : faded gray rectangle with "silent"
+% ============================================================
+% Coordinates of each subframe column center
+\def\colA{-3.05}
+\def\colB{-1.40}
+\def\colC{0.25}
+\def\colD{1.90}
+
+% Active cell helper (manual unrolling for clarity)
+% Each active cell: outer rectangle in cb!40, inner DMRS stripe in cb!50 + hatching
+
+% --- Row 1 (UE_1 / CB_1): active in Sub 1 and Sub 3 ---
+\node[cellbase, fill=cb1!40] at (\colA, -1.0) {};
+\fill[cb1!55, rowdmrs] ($(\colA, -1.0)+(0.45, -0.30)$)
+    rectangle ($(\colA, -1.0)+(0.70, 0.30)$);
+
+\node[silent] at (\colB, -1.0) {silent};
+
+\node[cellbase, fill=cb1!40] at (\colC, -1.0) {};
+\fill[cb1!55, rowdmrs] ($(\colC, -1.0)+(0.45, -0.30)$)
+    rectangle ($(\colC, -1.0)+(0.70, 0.30)$);
+
+\node[silent] at (\colD, -1.0) {silent};
+
+% --- Row 2 (UE_2 / CB_2): active in Sub 2 and Sub 4 ---
+\node[silent] at (\colA, -1.65) {silent};
+
+\node[cellbase, fill=cb2!40] at (\colB, -1.65) {};
+\fill[cb2!55, rowdmrs] ($(\colB, -1.65)+(0.45, -0.30)$)
+    rectangle ($(\colB, -1.65)+(0.70, 0.30)$);
+
+\node[silent] at (\colC, -1.65) {silent};
+
+\node[cellbase, fill=cb2!40] at (\colD, -1.65) {};
+\fill[cb2!55, rowdmrs] ($(\colD, -1.65)+(0.45, -0.30)$)
+    rectangle ($(\colD, -1.65)+(0.70, 0.30)$);
+
+% --- Row 3 (UE_3 / CB_3): active in Sub 2 and Sub 3 ---
+\node[silent] at (\colA, -2.30) {silent};
+
+\node[cellbase, fill=cb3!40] at (\colB, -2.30) {};
+\fill[cb3!55, rowdmrs] ($(\colB, -2.30)+(0.45, -0.30)$)
+    rectangle ($(\colB, -2.30)+(0.70, 0.30)$);
+
+\node[cellbase, fill=cb3!40] at (\colC, -2.30) {};
+\fill[cb3!55, rowdmrs] ($(\colC, -2.30)+(0.45, -0.30)$)
+    rectangle ($(\colC, -2.30)+(0.70, 0.30)$);
+
+\node[silent] at (\colD, -2.30) {silent};
+
+% --- Row 4 (UE_4 / CB_4): active in Sub 1 and Sub 4 ---
+\node[cellbase, fill=cb4!40] at (\colA, -2.95) {};
+\fill[cb4!55, rowdmrs] ($(\colA, -2.95)+(0.45, -0.30)$)
+    rectangle ($(\colA, -2.95)+(0.70, 0.30)$);
+
+\node[silent] at (\colB, -2.95) {silent};
+\node[silent] at (\colC, -2.95) {silent};
+
+\node[cellbase, fill=cb4!40] at (\colD, -2.95) {};
+\fill[cb4!55, rowdmrs] ($(\colD, -2.95)+(0.45, -0.30)$)
+    rectangle ($(\colD, -2.95)+(0.70, 0.30)$);
+
+% --- Row 5 (UE_5 / CB_5): active in Sub 3 and Sub 4 ---
+\node[silent] at (\colA, -3.60) {silent};
+\node[silent] at (\colB, -3.60) {silent};
+
+\node[cellbase, fill=cb5!40] at (\colC, -3.60) {};
+\fill[cb5!55, rowdmrs] ($(\colC, -3.60)+(0.45, -0.30)$)
+    rectangle ($(\colC, -3.60)+(0.70, 0.30)$);
+
+\node[cellbase, fill=cb5!40] at (\colD, -3.60) {};
+\fill[cb5!55, rowdmrs] ($(\colD, -3.60)+(0.45, -0.30)$)
+    rectangle ($(\colD, -3.60)+(0.70, 0.30)$);
+
+% --- Row 6 (UE_6 / CB_6): active in Sub 1 and Sub 2 ---
+\node[cellbase, fill=cb6!40] at (\colA, -4.25) {};
+\fill[cb6!55, rowdmrs] ($(\colA, -4.25)+(0.45, -0.30)$)
+    rectangle ($(\colA, -4.25)+(0.70, 0.30)$);
+
+\node[cellbase, fill=cb6!40] at (\colB, -4.25) {};
+\fill[cb6!55, rowdmrs] ($(\colB, -4.25)+(0.45, -0.30)$)
+    rectangle ($(\colB, -4.25)+(0.70, 0.30)$);
+
+\node[silent] at (\colC, -4.25) {silent};
+\node[silent] at (\colD, -4.25) {silent};
+
+% ============================================================
+% GRID FRAME (around the 6x4 cells)
+% ============================================================
+\draw[thick, black!55, rounded corners=2pt]
+    (-3.85, -0.65) rectangle (2.70, -4.60);
+
+% ============================================================
+% Vertical separators (light dashed) between subframes
+% ============================================================
+\draw[thin, black!25, dashed] (-2.225, -0.65) -- (-2.225, -4.60);
+\draw[thin, black!25, dashed] (-0.575, -0.65) -- (-0.575, -4.60);
+\draw[thin, black!25, dashed] (1.075, -0.65) -- (1.075, -4.60);
+
+% ============================================================
+% BRACE BELOW: d_f = 3
+% ============================================================
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}, thin, black!55]
+    (-3.85, -4.78) -- (2.70, -4.78);
+\node[font=\scriptsize, text=black!65, align=center] at (-0.575, -5.20)
+    {Each subframe accumulates $d_f = 3$ active codebooks};
+
+% ============================================================
+% SUPERPOSITION ARROW + RECEIVED ROW
+% ============================================================
+\draw[->, thick, black!55] (-0.575, -5.55) -- (-0.575, -6.05);
+\node[font=\scriptsize, text=black!70, anchor=west] at (-0.30, -5.80)
+    {$\Sigma$\, superposition over the air};
+
+\node[font=\scriptsize, anchor=east, text=black!70] at (-3.95, -6.45)
+    {Received (eNB):};
+
+\foreach \x in {-3.05, -1.40, 0.25, 1.90} {
+    \node[draw=black!55, line width=0.5pt, fill=black!8,
+          rounded corners=1pt, minimum width=1.55cm, minimum height=0.7cm,
+          font=\scriptsize, align=center, inner sep=2pt] at (\x, -6.45)
+        {1 composite\\waveform};
+}
+
+% Time arrow
+\draw[->, thin, black!60] (-3.85, -7.10) -- (2.80, -7.10)
+    node[right, font=\scriptsize, text=black!70] {time};
+
+% ============================================================
+% PARAMETERS CALLOUT (right side)
+% ============================================================
+\node[callout, anchor=north west] at (3.50, -0.50) {
+    \textbf{Design parameters}\\[2pt]
+    $N = 4$ subframes\\
+    $K = 6$ codebooks\\
+    $d_f = 3$ CBs per subframe\\
+    $d_v = 2$ subframes per CB\\
+    $K/N = 150\%$ overloading\\
+    $K = \binom{N}{d_v} = \binom{4}{2} = 6$
+};
+
+% ============================================================
+% LEGEND (right side, below parameters)
+% ============================================================
+\node[callout, anchor=north west] at (3.50, -3.10) {
+    \textbf{Legend}\\[3pt]
+    \tikz[baseline=-2pt]{\fill[cb1!40] (0,-0.10) rectangle (0.30, 0.12);
+                         \draw[black!50, line width=0.4pt]
+                            (0,-0.10) rectangle (0.30, 0.12);
+                         \fill[cb1!55, rowdmrs] (0.18,-0.08) rectangle (0.27, 0.10);}
+    \ Active cell (data + DMRS pilot stripe)\\[2pt]
+    \tikz[baseline=-2pt]{\fill[black!4] (0,-0.10) rectangle (0.30, 0.12);
+                         \draw[black!50, line width=0.4pt]
+                            (0,-0.10) rectangle (0.30, 0.12);}
+    \ Silent (UE not transmitting in this subframe)
+};
+
+\end{tikzpicture}
+\end{document}
