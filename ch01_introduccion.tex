@@ -39,25 +39,25 @@ operan de forma permanente~\cite{ref3}. Aplicaciones como el monitoreo de cultiv
 rastreo de flotas en zonas marítimas, la vigilancia ambiental en áreas protegidas o el
 soporte a comunidades rurales dependen de que la red sea capaz de atender muchos
 dispositivos con bajo consumo y cobertura global, algo que solo se logra combinando
-tecnologías de baja potencia como NB-IoT con infraestructura satelital~\cite{ref3, ref13}.
+tecnologías de baja potencia como NB-IoT con infraestructura satelital~\cite{ref3, ref7}.
 Esta brecha ha motivado el uso de redes no terrestres (NTN, \textit{Non-Terrestrial
 Networks}) y, en particular, de constelaciones de satélites de órbita baja (LEO,
 \textit{Low Earth Orbit}), que ofrecen una pérdida de trayectoria mucho menor que los
 satélites geoestacionarios y un retardo de ida y vuelta de entre 2 y 20\,ms, apropiado
-para aplicaciones IoT de baja latencia~\cite{ref3, ref6}. Sin embargo, el canal LEO
+para aplicaciones IoT de baja latencia~\cite{ref3, ref8}. Sin embargo, el canal LEO
 introduce efectos que no existen en enlaces terrestres ---desplazamiento Doppler, retardo
 variable y ventanas de visibilidad cortas--- que afectan directamente el procedimiento de
-acceso aleatorio y pueden empeorar el problema de colisiones~\cite{ref6, ref13}.
+acceso aleatorio y pueden empeorar el problema de colisiones~\cite{ref8, ref7}.
 
 Para atacar el cuello de botella del acceso, en la literatura reciente se han propuesto
 esquemas de acceso aleatorio no ortogonal (NORA, \textit{Non-Orthogonal Random Access}) que,
 en lugar de descartar a los dispositivos colisionados, intentan recuperarlos aprovechando
 las diferencias en potencia recibida o en tiempo de llegada de sus
-señales~\cite{ref4, ref5}. Variantes más avanzadas, como SARA
+señales~\cite{ref5, ref6}. Variantes más avanzadas, como SARA
 (\textit{Sparse Code Multiple Access-Applied Random Access}), combinan NORA con el acceso
 múltiple por código escaso (SCMA, \textit{Sparse Code Multiple Access}) para separar
 dispositivos usando \textit{codebooks} escasos y un detector basado en el algoritmo de paso
-de mensajes (MPA, \textit{Message Passing Algorithm})~\cite{ref10, ref17}.
+de mensajes (MPA, \textit{Message Passing Algorithm})~\cite{ref9, ref10}.
 Estos esquemas han logrado mejoras de más del 30\,\% en capacidad en entornos terrestres,
 pero su comportamiento bajo un canal satelital LEO todavía no se ha estudiado a profundidad
 y no se puede deducir directamente de los resultados publicados para escenarios terrestres,
@@ -66,7 +66,7 @@ visibilidad del satélite pueden cambiar de forma importante el desempeño del e
 
 A lo anterior se suma un tercer aspecto crítico: la detección de colisiones, que
 condiciona el desempeño de cualquier esquema no ortogonal. Los trabajos recientes sobre
-detección basada en aprendizaje automático~\cite{ref20}, muestran que la precisión del
+detección basada en aprendizaje automático~\cite{ref11}, muestran que la precisión del
 detector influye directamente sobre la capacidad efectiva del sistema, pero pocos estudios
 han evaluado cómo se comporta esta relación cuando el canal es el de un enlace LEO.
 Entender esta dependencia permite identificar qué tan robusto puede ser un esquema no
@@ -80,4 +80,4 @@ acceso, ni cómo se degrada esa capacidad cuando aparecen efectos propios del en
 satelital o errores en la detección de colisiones. Caracterizar este comportamiento aporta
 información útil tanto para el diseño de futuras redes IoT no terrestres como para
 orientar trabajos posteriores sobre mecanismos de acceso en NTN, un tema que la Release 18
-del 3GPP identifica como un problema abierto~\cite{ref13}.
+del 3GPP identifica como un problema abierto~\cite{ref7}.

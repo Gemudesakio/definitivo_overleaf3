@@ -24,13 +24,13 @@ bajo consumo de energía, logrando baterías con vida útil de hasta diez años 
 reemplazo. El estándar tiene tres modos de despliegue ---en banda (\textit{in-band}), en
 banda de guarda (\textit{guard-band}) y autónomo (\textit{standalone})--- que permiten a los
 operadores integrar NB-IoT dentro de sus redes LTE existentes o en espectro reasignado de
-tecnologías anteriores~\cite{ref3, ref18}.
+tecnologías anteriores~\cite{ref3, ref12}.
 
 Una característica importante de NB-IoT, que está directamente relacionada con el problema
 que se estudia en este trabajo, es su mecanismo de mejora de cobertura (CE,
 \textit{Coverage Enhancement}). Según la potencia de referencia de la señal recibida (RSRP,
 \textit{Reference Signal Received Power}), la estación base (eNB, \textit{evolved Node B}) clasifica a cada dispositivo en
-uno de tres niveles de cobertura: CE0, CE1 y CE2~\cite{ref7}. Esta clasificación define
+uno de tres niveles de cobertura: CE0, CE1 y CE2~\cite{ref4}. Esta clasificación define
 cuántas repeticiones de transmisión necesita el dispositivo: los que están en condiciones
 difíciles ---lejos de la celda, dentro de edificios o con obstáculos--- compensan la pérdida
 de señal repitiendo la transmisión varias veces. La Tabla~\ref{tab:ce_params} muestra los
@@ -55,7 +55,7 @@ Latencia MSG1 & 6{,}40 ms & 51{,}20 ms & 204{,}79 ms \\
 El canal físico de acceso aleatorio de banda estrecha (NPRACH,
 \textit{Narrowband Physical Random Access Channel}) es el recurso que usan los dispositivos
 para iniciar la conexión. En su configuración estándar, NB-IoT tiene solo 48 preámbulos
-ortogonales por oportunidad de acceso~\cite{ref7}. Este número, que ya es bajo para escenarios
+ortogonales por oportunidad de acceso~\cite{ref4}. Este número, que ya es bajo para escenarios
 de densidad moderada, se convierte en un cuello de botella crítico cuando cientos o miles de
 dispositivos intentan acceder al mismo tiempo, algo común en tráfico MTC de tipo ráfaga
 provocado por eventos externos. La falta de preámbulos aumenta la probabilidad de colisión,
@@ -79,7 +79,7 @@ El acceso aleatorio es el mecanismo que usa un equipo de usuario (UE, \textit{Us
 de NB-IoT para establecer su primera comunicación con el eNB antes de que se le asignen
 recursos dedicados. En su forma estándar, llamada acceso aleatorio basado en concesión
 (\textit{grant-based random access}), el procedimiento consiste en cinco mensajes entre el
-dispositivo y la red~\cite{ref5, ref7}. La Figura~\ref{fig:ra_msc} resume ese intercambio,
+dispositivo y la red~\cite{ref6, ref4}. La Figura~\ref{fig:ra_msc} resume ese intercambio,
 que se describe a continuación.
 
 \begin{figure}[H]
@@ -123,10 +123,10 @@ Physical Uplink Shared Channel}), usando el TC-RNTI asignado. El eNB responde co
 mensaje de resolución de contención (MSG4) que contiene la identidad permanente del
 dispositivo (IMSI, \textit{International Mobile Subscriber Identity}) y el identificador de
 radio definitivo (C-RNTI, \textit{Cell Radio Network Temporary Identifier}), con lo cual queda
-establecido el enlace de control de recursos de radio (RRC, \textit{Radio Resource Control}).
+establecido el control de recursos de radio (RRC, \textit{Radio Resource Control}).
 Por último, el UE confirma con un
 acuse de recibo (MSG5), y a partir de ese momento la conexión queda
-establecida~\cite{ref7}.
+establecida~\cite{ref4}.
 
 Ahora bien, el punto crítico de este flujo está en el MSG1. Como los dispositivos eligen el
 preámbulo de forma independiente y al azar, dos o más UEs pueden escoger el mismo preámbulo
@@ -137,15 +137,15 @@ RAR para ese preámbulo. Todos los UEs involucrados reciben el mismo TC-RNTI y t
 MSG3 sobre los mismos recursos, lo cual genera otra colisión en el canal ascendente. Solo el
 mensaje MSG4, mediante la coincidencia del IMSI, permite que cada dispositivo sepa si la
 resolución de contención le corresponde; los demás UEs, al no reconocer su identidad en MSG4,
-deben esperar a que expire el temporizador T300 y empezar de nuevo desde MSG1~\cite{ref4,
-ref7}. En los niveles CE1 y CE2, donde las oportunidades de acceso pueden estar separadas por
+deben esperar a que expire el temporizador T300 y empezar de nuevo desde MSG1~\cite{ref5,
+ref4}. En los niveles CE1 y CE2, donde las oportunidades de acceso pueden estar separadas por
 640 ms o 2560 ms, respectivamente, cada reintento fallido agrega retardos que pueden pasar de
 varios segundos por dispositivo.
 
 La probabilidad de colisión crece rápidamente con la densidad de dispositivos. Si en una
 oportunidad de acceso hay $M$ UEs activos y $N$ preámbulos disponibles, la probabilidad de que
 al menos dos dispositivos seleccionen el mismo preámbulo se puede aproximar mediante la
-Ecuación~\ref{eq:pcol}~\cite{ref4}.
+Ecuación~\ref{eq:pcol}~\cite{ref5}.
 
 \begin{equation}
 P_{\text{col}} = 1 - \frac{N!}{N^{M}(N-M)!}
@@ -154,12 +154,12 @@ P_{\text{col}} = 1 - \frac{N!}{N^{M}(N-M)!}
 
 Para NB-IoT, con $N = 48$ preámbulos, basta con que $M$ supere unas pocas decenas de
 dispositivos para que la probabilidad de colisión se vuelva dominante, haciendo que la mayor
-parte de los intentos de acceso fallen en el primer mensaje~\cite{ref7}.
+parte de los intentos de acceso fallen en el primer mensaje~\cite{ref4}.
 
 Ante esta limitación, en la literatura se han propuesto dos tipos de solución. La primera usa
 técnicas de control de sobrecarga, como el bloqueo de clase de acceso (ACB,
 \textit{Access Class Barring}), que limitan cuántos dispositivos pueden intentar acceder en
-cada intervalo, reduciendo la congestión pero aumentando el retardo~\cite{ref5}. La segunda,
+cada intervalo, reduciendo la congestión pero aumentando el retardo~\cite{ref6}. La segunda,
 y la más importante para este trabajo, propone modificar el procedimiento de acceso para
 recuperar los dispositivos que colisionaron en vez de descartarlos, aprovechando las
 diferencias entre sus señales para separarlos y permitir que todos avancen en el proceso de
@@ -175,15 +175,15 @@ El acceso aleatorio no ortogonal surge como respuesta directa al problema de col
 descrito en la sección anterior. Mientras que el esquema ortogonal convencional descarta los
 dispositivos que colisionaron y los obliga a reintentar, NORA propone recuperarlos: si las
 señales que se superponen en el receptor tienen diferencias suficientes ---en potencia
-recibida, en tiempo de llegada o en código de acceso---, se pueden separar y decodificar
+recibida, en tiempo de llegada o en código de acceso, se pueden separar y decodificar
 cada una por separado, permitiendo que todos los dispositivos avancen en el proceso de
-conexión sin usar recursos adicionales~\cite{ref4, ref5}. La base técnica de este enfoque es
+conexión sin usar recursos adicionales~\cite{ref5, ref6}. La base técnica de este enfoque es
 el acceso múltiple no ortogonal (NOMA, \textit{Non-Orthogonal Multiple Access}), que al
 aplicarse al contexto del acceso aleatorio da origen a NORA.
 
 NOMA se basa en dos mecanismos que trabajan juntos: la codificación por superposición en el
 transmisor y la cancelación sucesiva de interferencia (SIC,
-\textit{Successive Interference Cancellation}) en el receptor~\cite{ref5, ref8}. En el
+\textit{Successive Interference Cancellation}) en el receptor~\cite{ref6, ref13}. En el
 enlace ascendente, varios dispositivos transmiten al mismo tiempo sobre el mismo recurso
 tiempo-frecuencia pero con diferentes niveles de potencia. El eNB recibe la suma
 de estas señales y aplica SIC para separarlas: primero decodifica la señal más fuerte
@@ -191,7 +191,7 @@ tratando a las demás como ruido, después la resta de la señal total y decodif
 siguiente, y así sucesivamente hasta recuperar cada mensaje. Para que SIC funcione bien, es
 necesario que las señales tengan diferencias de potencia claras, lo que en el acceso aleatorio
 se consigue gracias a la variación natural del canal entre dispositivos que están a diferentes
-distancias del eNB~\cite{ref5}.
+distancias del eNB~\cite{ref6}.
 
 En NORA, la separación de señales se hace desde el primer mensaje del procedimiento de
 acceso. Cuando dos o más UEs transmiten el mismo preámbulo y sus señales llegan con tiempos
@@ -201,18 +201,18 @@ diferente~\cite{ref4}. Con esta información, el eNB genera varias respuestas RA
 para el mismo preámbulo colisionado, una por cada dispositivo identificado, y le pide a cada
 uno que ajuste su potencia de transmisión antes de enviar MSG3. Cuando recibe los MSG3, el
 eNB aplica SIC para separar las transmisiones superpuestas y decodificar cada
-mensaje de forma independiente~\cite{ref4, ref5}.
+mensaje de forma independiente~\cite{ref5, ref6}.
 
 El impacto de esta modificación en el desempeño es importante. Liang
-\textit{et al.}~\cite{ref4} demuestran que NORA supera al esquema ortogonal convencional en
+\textit{et al.}~\cite{ref5} demuestran que NORA supera al esquema ortogonal convencional en
 probabilidad de éxito del acceso, probabilidad de colisión y capacidad de la red, con una
 mejora de más del 30\,\% en el número de dispositivos que se pueden atender al mismo tiempo.
-Por su parte, Seo \textit{et al.}~\cite{ref5} muestran que el \textit{throughput} máximo con
+Por su parte, Seo \textit{et al.}~\cite{ref6} muestran que el \textit{throughput} máximo con
 NORA puede superar 0{,}7 paquetes por ranura, frente al límite teórico de 0{,}368 del
 esquema ALOHA ranurado\footnote{ALOHA es un protocolo de acceso múltiple por contención en
 el que los dispositivos transmiten sin coordinación previa; en su versión ranurada
 (\textit{Slotted ALOHA}) las transmisiones se alinean a ranuras de tiempo, lo que reduce las
-colisiones y eleva el \textit{throughput} máximo respecto al ALOHA puro.} convencional. Wang \textit{et al.}~\cite{ref8} amplían este análisis
+colisiones y eleva el \textit{throughput} máximo respecto al ALOHA puro.} convencional. Wang \textit{et al.}~\cite{ref13} amplían este análisis
 a redes MTC masivas, donde la formación de grupos NOMA y la optimización del factor de
 retroceso de potencia permiten superar al NORA convencional en \textit{throughput} cuando
 la carga es alta.
@@ -222,11 +222,11 @@ El acceso aleatorio no ortogonal sin concesión (GF-NORA,
 \textit{Grant-Free Non-Orthogonal Random Access}) elimina la fase de solicitud de recursos y
 permite que los dispositivos transmitan directamente sus datos sin esperar una asignación
 previa, lo que reduce la latencia pero requiere mayor esfuerzo para detectar la actividad
-de los usuarios~\cite{ref9}. El NORA triangular (T-NORA, \textit{Triangular NORA}) adapta el
-procedimiento a paquetes de distinto tamaño en sistemas de antenas masivas~\cite{ref11},
+de los usuarios~\cite{ref14}. El NORA triangular (T-NORA, \textit{Triangular NORA}) adapta el
+procedimiento a paquetes de distinto tamaño en sistemas de antenas masivas~\cite{ref15},
 mientras que el NORA con paginación grupal (NORA-GP, \textit{NORA-based Group Paging})
-controla la sobrecarga en redes 5G con tráfico MTC intenso~\cite{ref12}. En el caso
-particular de NB-IoT, Wang \textit{et al.}~\cite{ref7} proponen el NORA para NB-IoT
+controla la sobrecarga en redes 5G con tráfico MTC intenso~\cite{ref16}. En el caso
+particular de NB-IoT, Wang \textit{et al.}~\cite{ref4} proponen el NORA para NB-IoT
 (NB-NORA), que combina la identificación por ToA con control de potencia adaptativo y logra un
 \textit{throughput} hasta un 75\,\% mayor que el del esquema ortogonal de referencia.
 
@@ -299,8 +299,8 @@ La combinación de \textit{codebooks} escasos y detección MPA hace que SCMA sea
 compartan los mismos recursos físicos sin necesitar más ancho de banda ni diferencias de
 potencia entre ellos. Sin embargo, el desempeño de este esquema también depende de las
 condiciones del canal. Cuando la transmisión se hace a través de un enlace satelital de
-órbita baja, el canal introduce efectos adicionales ---retardo variable, desplazamiento
-Doppler y desvanecimiento dinámico--- que no existen en redes terrestres y que afectan
+órbita baja, el canal introduce efectos adicionales retardo variable, desplazamiento
+Doppler y desvanecimiento dinámico que no existen en redes terrestres y que afectan
 directamente la detección MPA y el procedimiento de acceso en general. Antes de abordar el
 entorno satelital, es necesario describir cómo el eNB detecta la ocurrencia de una
 colisión, ya que esto determina directamente qué tan bien funcionan los esquemas NORA y SCMA.
@@ -530,13 +530,12 @@ MSG3 correctamente, lo que reduce la capacidad efectiva respecto a lo que predic
 modelos terrestres~\cite{ref6, ref13}.
 
 La relación entre la densidad de dispositivos y la capacidad del canal se puede ver en la
-curva de \textit{throughput} del sistema. A medida que el número de dispositivos activos $M$
-crece, el \textit{throughput} aumenta al principio porque hay más transmisiones útiles, pero
-a partir de cierto punto las colisiones empiezan a dominar y el \textit{throughput} comienza
+curva de throughput del sistema. A medida que el número de dispositivos activos $M$
+crece, el throughput aumenta al principio porque hay más transmisiones útiles, pero
+a partir de cierto punto las colisiones empiezan a dominar y el throughput comienza
 a bajar, hasta que el sistema colapsa por congestión~\cite{ref5}. El punto de máximo
-\textit{throughput} define la carga óptima de operación y, junto con la probabilidad de éxito
+throughput define la carga óptima de operación y, junto con la probabilidad de éxito
 de acceso bajo esa carga, marca la capacidad operativa del canal. Un esquema como NORA, que
 recupera dispositivos colisionados en vez de descartarlos, mueve este punto de máximo hacia
 cargas mayores, aumentando la capacidad del canal sin necesitar recursos
-adicionales~\cite{ref4, ref5}. Estas métricas son las que se usan para comparar los esquemas
-Legacy, CRACS-R y CRACS-T en la simulación de este trabajo.
+adicionales~\cite{ref4, ref5}.

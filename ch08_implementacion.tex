@@ -4,7 +4,9 @@
 \section{Selección del entorno de simulación}
 \label{sec:impl_herramientas}
 
-La implementación del diseño formalizado en el \cref{ch:diseno} requería una plataforma capaz de modelar con suficiente granularidad la pila de protocolos NB-IoT ---en particular las capas MAC y RRC del procedimiento de acceso aleatorio--- e incorporar componentes propios para el escenario LEO no terrestre. Como parte de la búsqueda de herramientas se consideraron tres alternativas representativas en la práctica académica. La \cref{tab:impl_herramientas} contrasta esos tres entornos a través de cinco criterios alineados con los requerimientos del trabajo.
+La implementación del diseño formalizado en el Capítulo 3 requería una plataforma capaz de simular el funcionamiento de los protocolos NB-IoT, en particular de las capas MAC y RRC involucradas en el procedimiento de acceso aleatorio, así como incorporar componentes propios para el escenario LEO no terrestre. Con este propósito, se evaluaron tres plataformas de simulación ampliamente utilizadas en investigación: ns-3, OMNeT++/INET y 5G-LENA-NTN. La comparación se realizó considerando el soporte de NB-IoT, la capacidad para representar enlaces satelitales, la facilidad para modificar el procedimiento de acceso aleatorio y el costo computacional. 
+
+La \cref{tab:impl_herramientas} resume la comparación.
 
 \begin{table}[H]
 \centering
@@ -32,33 +34,29 @@ Documentación y comunidad & Extensa, con publicaciones y módulos contribuidos.
 \end{tabular}
 \end{table}
 
-El análisis criterio por criterio orienta la elección con claridad. En granularidad PHY/MAC los tres entornos son comparables a nivel de paquete, pero la pila NR de 5G-LENA-NTN no resuelve el problema del acceso aleatorio en NB-IoT, y la modularidad de OMNeT++ exige integrar y mantener \emph{frameworks} externos. En soporte NB-IoT la diferencia es categórica: solo ns-3 cuenta con una implementación nativa del procedimiento; las otras dos exigirían portarlo desde cero. En el modelo de movilidad satelital, ns-3 dispone de modelo orbital LEO y modelo de propagación LEO listos para usar; OMNeT++ los requeriría como desarrollo propio; 5G-LENA-NTN incorpora un modelo de canal NTN más detallado pero en una pila tecnológica distinta. En costo computacional las tres opciones son equivalentes y aceptables para los volúmenes esperados. En documentación y comunidad, ns-3 lidera por su tradición académica.
+De las alternativas evaluadas, ns-3 fue la opción más adecuada. Aunque 5G-LENA-NTN incorpora modelos más recientes para redes NTN, está orientado a NR y no implementa NB-IoT. Por su parte, OMNeT++ ofrece una arquitectura flexible, pero requiere desarrollar gran parte del procedimiento de acceso aleatorio. En cambio, ns-3 dispone de una base madura para LTE/NB-IoT y permitió concentrar el desarrollo en los mecanismos propuestos sin modificar las capas superiores del simulador.
 
-A partir de este análisis se seleccionó ns-3 versión 3.32 como plataforma principal por dos razones. Primero, su módulo LTE incluye un procedimiento de acceso aleatorio NB-IoT funcional con estructuras MAC y RRC adaptables, lo que evita portar el procedimiento completo. Segundo, ns-3 proporciona de fábrica un modelo de movilidad orbital y un modelo de propagación LEO que se integran de forma nativa con la simulación a nivel de paquete.
-
-Se descartaron las dos alternativas modernas por razones complementarias. 5G-LENA-NTN aporta un modelo de canal NTN más maduro, pero su pila NR de nueva generación no contempla NB-IoT y habría exigido una migración significativa fuera del alcance del trabajo de grado. OMNeT++ con INET ofrece una capa MAC LTE modular, pero tampoco implementa NB-IoT de forma nativa y obligaba a portar el procedimiento completo. Por estas razones se mantuvo ns-3 como base.
-
-\section{Consideraciones y limitaciones de implementación}
+\section{Consideraciones de implementación}
 \label{sec:impl_limitaciones}
 
-Durante la fase de implementación se hicieron explícitas tres clases de restricciones que acotan el alcance de la simulación.
+La implementación se desarrolla sobre un escenario controlado con un único satélite LEO y una población de UEs estacionarios. El canal se modela mediante línea de vista con pérdidas constantes y un criterio de cobertura basado en el ángulo mínimo de elevación. No se incluyen efectos como desvanecimiento rápido, sombreado o desplazamiento Doppler, ya que el objetivo del trabajo es evaluar el procedimiento de acceso aleatorio y no el comportamiento detallado del canal.
 
-\paragraph{Restricciones computacionales:} ns-3 ejecuta sus eventos de manera secuencial sobre un solo hilo. Una ejecución de 120~s simulados con pocos UEs activos toma del orden de segundos de tiempo de cómputo. La fase experimental requiere miles de ejecuciones para construir intervalos de confianza con 30 semillas por punto, lo que se afronta mediante paralelización externa de procesos independientes (\cref{sec:impl_recoleccion}).
+El simulador ns-3 ejecuta los eventos de forma secuencial. Para reducir el tiempo total de ejecución de las simulaciones, estas se ejecutan en paralelo mediante procesos independientes, utilizando una semilla diferente del generador de números aleatorios en cada ejecución.
 
-\paragraph{Simplificaciones de alcance del modelo:} el simulador implementa un único satélite LEO sirviendo a una población de UEs estacionarios sobre un único Bloque de Recursos Físicos (PRB) de 180~kHz, que contiene 12 subportadoras espaciadas a 15~kHz. El NPRACH ocupa hasta esas 12 subportadoras físicas; el pool de preámbulos se barre entre 12, 24, 36 y 48 valores en el espacio lógico de 3{,}75~kHz, con cuatro preámbulos virtuales por subportadora física. La transmisión MSG3 es multi-tono. Lo que no se barre dinámicamente es el ancho de banda asignado al canal de acceso: se mantiene constante en 1~PRB durante toda la campaña. La propagación se modela como línea de vista con pérdidas constantes (atmosférica, espacio libre y margen) y un criterio de cobertura de tipo todo-o-nada según el ángulo de elevación mínimo. No se modelan desvanecimiento rápido, sombreado, ni desplazamiento Doppler. Estos supuestos se documentan en detalle en la \cref{sec:modelo_sistema} y acotan el alcance de validez de los resultados que siguen.
+Finalmente, la implementación reutiliza los componentes estándar de ns-3 siempre que es posible. Las modificaciones se concentran en la capa MAC del eNB y en los módulos necesarios para implementar los esquemas CRACS-R y CRACS-T, preservando el funcionamiento de los demás componentes del simulador.
 
-\paragraph{Compatibilidad con la base ns-3:} la extensión del módulo LTE se construyó sobre los componentes reutilizados de ns-3 (capa RLC, dispositivos de red y \emph{helpers} EPC) sin modificarlos, para no bifurcar la base de código y mantener la simulación apoyada en partes ya validadas por la comunidad. Esto condicionó algunas decisiones de diseño, que respetaron las interfaces existentes de esos componentes.
+\label{sec:impl_arquitectura}
 
 \section{Arquitectura de la implementación}
 \label{sec:impl_arquitectura}
 
-La implementación se organizó por componentes y distingue tres orígenes distintos. Los componentes \emph{reutilizados} provienen directamente de la base ns-3 y no se modificaron, lo que asegura que su comportamiento ya esté validado por la comunidad. Los componentes \emph{extendidos} parten de una implementación existente pero se adaptaron para reflejar con mayor fidelidad las condiciones del escenario NB-IoT no terrestre o para no introducir sesgos a favor de un esquema. Los componentes \emph{nuevos} fueron desarrollados como aporte original del trabajo e implementan los algoritmos y abstracciones propuestos en el diseño. La \cref{tab:impl_componentes} consolida este mapeo con su correspondencia a las secciones del capítulo de diseño y la categoría de origen.
+La implementación reutiliza la mayor cantidad posible de funcionalidades existentes de ns-3 y añade únicamente los módulos necesarios para implementar los esquemas propuestos. La \cref{tab:impl_componentes} resume los principales módulos desarrollados o modificados.
 
 \begin{table}[H]
 \centering
 \caption{Mapeo entre los bloques del diseño y los componentes implementados.}
 \label{tab:impl_componentes}
-\small
+\scriptsize
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.5cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.0cm}@{}}
 \toprule
@@ -83,33 +81,11 @@ Sistema de reportería interno & Módulo común a los tres esquemas que centrali
 \end{tabularx}
 \end{table}
 
-La tabla refleja una decisión arquitectónica importante: toda la diferencia entre esquemas reside en componentes nuevos a nivel del MAC del eNB; la pila por encima (RLC, dispositivos de red, EPC) permanece compartida. Esta granularidad preserva la trazabilidad del comportamiento del simulador y simplifica la depuración cruzada entre los tres esquemas, porque cualquier diferencia observada en los KPIs es atribuible a la lógica de acceso aleatorio y no a una asimetría en las capas superiores. La extensión del generador de tráfico es necesaria para soportar los dos modelos mMTC del estándar; la extensión del procedimiento Legacy se justifica a continuación.
-
-\paragraph{Extensión del procedimiento Legacy --- manejo realista de colisiones:} la rama Legacy preserva la lógica del procedimiento NB-IoT original incluido en ns-3, pero se modificó el manejo de las colisiones. En la implementación de base los preámbulos detectados como colisión se descartaban tempranamente, de modo que los UEs implicados no consumían los recursos del procedimiento aguas abajo. Esta simplificación era conveniente pero \emph{optimista}: subestimaba el costo real de una colisión y favorecía artificialmente al baseline en las comparaciones contra los esquemas con SCMA. La implementación actual extiende esa lógica para que las transmisiones colisionantes consuman efectivamente los recursos del procedimiento hasta MSG3 ---emisión de una RAR compartida, transmisión MSG3 sobre PUSCH y recepción posterior--- y sean descartadas en el receptor mediante una decisión explícita. De este modo, una colisión real ocupa los mismos recursos que ocuparía sobre el aire en una red NB-IoT desplegada, lo que produce comparaciones más fieles entre los tres esquemas y elimina el sesgo a favor de Legacy.
+La principal modificación sobre el procedimiento Legacy consiste en representar explícitamente las colisiones durante MSG3. En la implementación original de ns-3 los preámbulos en colisión se descartaban antes de consumir recursos del procedimiento de acceso. En esta implementación los UEs continúan el procedimiento hasta MSG3, permitiendo representar de forma más realista el costo de una colisión y realizar una comparación más justa con CRACS-R y CRACS-T.
 
 \section{Configuración del simulador}
 \label{sec:impl_config}
-
-La configuración del simulador se gobierna desde un único punto de entrada que expone los parámetros del experimento como argumentos de línea de comandos. Esta separación permite recorrer todos los escenarios de evaluación sin recompilar.
-
-\paragraph{Parámetros globales:} los parámetros comunes a los tres esquemas se agrupan en cuatro categorías:
-\begin{itemize}[leftmargin=*, noitemsep]
-  \item \emph{Parámetros orbitales del satélite:} altitud orbital, inclinación, latitud y longitud iniciales del punto sub-satelital y ángulo de elevación mínimo de cobertura.
-  \item \emph{Parámetros del canal:} pérdidas atmosférica, de espacio libre y de margen, junto con la velocidad de propagación.
-  \item \emph{Parámetros de tráfico:} modelo activo (Poisson o Beta), preset de población virtual, perfil de duración y máximo de arribos por simulación.
-  \item \emph{Semilla de aleatoriedad:} permite reproducir cada corrida bit a bit.
-\end{itemize}
-
-\paragraph{Parámetros por esquema:} la selección del esquema activo se hace mediante un parámetro categórico, y cada esquema expone sus propios ajustes:
-\begin{itemize}[leftmargin=*, noitemsep]
-  \item \emph{Legacy:} no expone parámetros adicionales más allá de los globales; es el baseline NB-IoT estándar.
-  \item \emph{CRACS-R:} tamaño máximo de grupo SCMA y tamaño del catálogo de pilotos DMRS anunciados.
-  \item \emph{CRACS-T:} distancia diferencial mínima $\Delta d_{\min}$ entre clústeres ToA, parámetro central de su mecanismo de agrupamiento.
-\end{itemize}
-
-\paragraph{Detector de colisiones:} la probabilidad de detección y la de falsa alarma del detector probabilístico son comunes a CRACS-R y CRACS-T y se exponen como parámetros configurables para permitir el estudio de sensibilidad.
-
-La \cref{tab:impl_flags} consolida los parámetros más relevantes con sus valores de referencia. La tabla preserva el identificador técnico de cada parámetro para que la corrida sea reproducible por quien acceda al simulador, pero el cuerpo del capítulo se refiere a ellos por su rol funcional.
+La configuración del simulador se realiza mediante parámetros de entrada, lo que permite ejecutar todos los escenarios definidos en el Capítulo~\ref{ch:diseno} sin modificar el código fuente. La \cref{tab:impl_flags} presenta los parámetros más importantes y sus valores de referencia.
 
 \begin{table}[H]
 \centering
@@ -140,224 +116,197 @@ Tiempo simulado total & Duración de cada corrida. & 120\,000~ms \\
 \end{tabularx}
 \end{table}
 
-\subsection{Modelo de tráfico}
-\label{sec:impl_trafico}
+\newpage
 
-La generación del tráfico de acceso implementa los dos modelos para mMTC definidos en 3GPP TR~37.868 \S6.1.1. Ambos comparten el parámetro $N$ que fija el número exacto de UEs inicializados en la simulación. La selección entre ellos depende de la pregunta operativa que el escenario pretenda responder.
+Los parámetros comunes controlan la geometría del escenario, el modelo de tráfico, las condiciones del canal y la semilla de aleatoriedad. Adicionalmente, cada esquema dispone de sus propios parámetros: CRACS-R configura el catálogo de recursos SCMA, mientras que CRACS-T incorpora el umbral de agrupamiento $\Delta d_{\min}$.
 
-\paragraph{Traffic Model 1 --- Poisson uniforme:} los inter-arribos se generan con una variable aleatoria exponencial de media $1/\lambda$, donde $\lambda = N_{\text{pop}}/T_{\text{period}}$. Cuando se utiliza el preset \emph{custom}, $N_{\text{pop}}$ es la población virtual configurable (típicamente igual a $N$) y $T_{\text{period}}$ se fija con el horizonte declarado (60~s en el escenario E6\_uniform, alineado con el caso nominal 3GPP). Los presets \emph{avg}, \emph{high} y \emph{ultra} ofrecen valores cerrados (52\,500, 200\,000, 500\,000) combinados con perfiles temporales (7\,200~s, 600~s) para experimentos de carga rápida. Este modelo responde a la pregunta de capacidad estructural bajo carga sostenida, y reproduce el caso de tráfico de fondo no correlacionado donde cada dispositivo opera con su propio reloj.
-
-\paragraph{Traffic Model 2 --- Beta$(3,4)$ sincronizado:} los $N$ instantes de arribo se generan como $t_i = T \cdot X_i$ con $X_i \sim \mathrm{Beta}(\alpha = 3, \beta = 4)$ y horizonte $T$ configurable (10~s en E6\_burst, valor nominal 3GPP). La densidad de arribos tiene un pico en $t^\ast = (\alpha - 1)/(\alpha + \beta - 2) \cdot T = 0{,}4\,T$. La generación interna aprovecha la identidad: si $X \sim \mathrm{Gamma}(\alpha, 1)$ y $Y \sim \mathrm{Gamma}(\beta, 1)$, entonces $X/(X + Y) \sim \mathrm{Beta}(\alpha, \beta)$. Este modelo responde a la pregunta de robustez ante ráfagas sincronizadas por un evento común (corte de luz, alarma masiva, encendido tras período de descanso). En NB-IoT no terrestre representa además el caso normal al inicio de cada ventana de visibilidad satelital, cuando varios UEs intentan acceder simultáneamente al recuperar conectividad.
-
-Los escenarios E6\_uniform y E6\_burst (\cref{tab:escenarios}) barren la misma variable $N \in \{30, 100, 300, 1000\}$ bajo cada modelo, lo que permite contrastar sus efectos sobre los tres esquemas. El tope superior $N = 1000$ se eligió por viabilidad computacional; la especificación 3GPP nominal contempla hasta $N = 30\,000$ y queda fuera del alcance experimental por su costo de simulación, declarándose como trabajo futuro.
-
-\subsection{Distribución espacial de los UEs}
-\label{sec:impl_espacial}
-
-Las posiciones iniciales de los UEs se generan mediante una asignación uniforme sobre un disco horizontal de radio $R_{\text{cell}}$ centrado en el origen local; cada posición resultante se proyecta posteriormente al sistema ECEF utilizando como referencia geográfica la latitud y longitud central declaradas. Los UEs son estacionarios durante toda la simulación, mientras que el satélite sí evoluciona en el tiempo a través del modelo orbital LEO.
-
-La implementación actual cubre la distribución uniforme. Una distribución agrupada con varios focos geográficos y dispersión local no está implementada y queda como una extensión natural para evaluaciones de robustez ante no uniformidad espacial.
-
-\section{Desarrollo de módulos}
+\section{Implementación de los módulos}
 \label{sec:impl_modulos}
 
-Esta sección detalla los cuatro algoritmos centrales que implementan la lógica nueva del simulador. Cada algoritmo se presenta primero con una breve introducción del problema que resuelve, una descripción verbal de su funcionamiento y, a continuación, el pseudocódigo formal acompañado de su complejidad y el bloque del diseño al que corresponde.
+Los esquemas CRACS-R y CRACS-T incorporan módulos adicionales al procedimiento Legacy para implementar la detección de colisiones, el agrupamiento de usuarios y la resolución de las transmisiones recibidas en MSG3.
 
-\subsection{Detector probabilístico de colisión}
+\subsection{Detección de colisiones y agrupamiento}
 \label{sec:impl_detector}
 
-El detector se invoca al final de la recepción de los preámbulos NPRACH, antes de decidir cómo construir las RAR. Implementa el mecanismo descrito en la \cref{sec:cracs_r}, común a CRACS-R y CRACS-T, y resuelve el siguiente problema: a partir del estado real de colisión ---observable internamente por el contador de UEs que comparten un mismo identificador de preámbulo (RAPID)---, el detector debe producir una decisión binaria con una tasa de detecciones correctas (TPR) y una tasa de falsas alarmas (FPR) calibradas. La decisión binaria es la que el MAC utiliza para bifurcar entre el flujo de éxito y el flujo de resolución por colisión.
+La primera etapa del procedimiento consiste en determinar si un preámbulo recibido corresponde a una transmisión individual o a una colisión. Cuando el esquema utilizado es CRACS-T y se detecta una colisión, los UEs involucrados se agrupan utilizando su distancia diferencial antes de construir las respuestas de acceso (RAR).
 
-El funcionamiento se basa en un sorteo Bernoulli condicionado al estado real. Si hay colisión real, el detector la reconoce con probabilidad TPR; si no la hay, el detector reporta falsa alarma con probabilidad FPR. De este modo, el simulador refleja la incertidumbre típica de un detector práctico sin depender del proceso físico de correlación de secuencias en banda base. El \cref{alg:detector} formaliza la operación.
+El detector recibe como entrada el estado real de cada preámbulo observado por el eNB y genera una decisión binaria sobre la existencia de colisión. Cuando la colisión existe, se detecta con probabilidad $p_{\mathrm{det}}$; en caso contrario, puede producirse una falsa alarma con probabilidad $p_{\mathrm{fa}}$. De esta forma el simulador representa el comportamiento de un detector práctico sin modelar el procesamiento físico del NPRACH.
+
+El procedimiento implementado se resume en el \cref{alg:detector}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
 \caption{Detector probabilístico de colisión}
 \label{alg:detector}
-\KwIn{\texttt{actualCollision} (bool, indica si dos o más UEs comparten RAPID); \texttt{TPR}; \texttt{FPR}}
-\KwOut{\texttt{predictedCollision} (bool consumido por el MAC para bifurcar)}
-$u \leftarrow \mathrm{Uniform}(0, 1)$\;
-\eIf{$\mathtt{actualCollision} = \mathrm{true}$}{
-  $\mathtt{predictedCollision} \leftarrow (u < \mathtt{TPR})$ \tcp*[r]{detección con prob. TPR}
+\KwIn{\texttt{actualCollision} (bool); \texttt{TPR}; \texttt{FPR}}
+\KwOut{\texttt{predictedCollision}}
+
+$u \leftarrow \mathrm{Uniform}(0,1)$\;
+
+\eIf{$\mathtt{actualCollision}$}{
+    $\mathtt{predictedCollision}\leftarrow(u<\mathtt{TPR})$\;
 }{
-  $\mathtt{predictedCollision} \leftarrow (u < \mathtt{FPR})$ \tcp*[r]{falsa alarma con prob. FPR}
+    $\mathtt{predictedCollision}\leftarrow(u<\mathtt{FPR})$\;
 }
+
 \Return $\mathtt{predictedCollision}$\;
+
 \end{algorithm}
 
-\noindent\textbf{Complejidad:} $O(1)$ por invocación. La generación uniforme aprovecha el generador de números aleatorios global del simulador, ligado a la semilla configurada.
+\noindent\textbf{Complejidad:} $O(1)$ por preámbulo evaluado.
 
-\subsection{Algoritmo de \emph{clustering} ToA por distancia diferencial}
-\label{sec:impl_clustering}
+Cuando el detector confirma una colisión, CRACS-T agrupa los UEs utilizando su distancia diferencial. Primero se ordenan las distancias en forma ascendente y luego se forman nuevos clústeres cada vez que la separación supera el umbral $\Delta d_{\min}$. Todos los UEs pertenecientes a un mismo clúster reciben posteriormente el mismo identificador de clúster.
 
-El \emph{clustering} por tiempo de llegada es el aporte algorítmico central de CRACS-T (\cref{sec:cracs_t,sec:toa}). Resuelve el siguiente problema: dadas las distancias diferenciales $\Delta d_i = d_{\text{slant},i} - h_{\text{sat}}$ de los $K$ UEs colisionantes, agruparlos en clústeres disjuntos tales que dentro de un clúster todos los UEs estén dentro de la resolución de ToA $\Delta d_{\min}$ y entre clústeres consecutivos haya al menos esa misma separación. La salida es una asignación de cada UE a un identificador de clúster.
-
-El funcionamiento sigue un barrido ordenado de tipo \emph{single-link}: se ordenan las distancias en orden ascendente y se recorre el vector ordenado, comparando cada UE con el inicio del clúster actual. Si la diferencia supera el umbral $\Delta d_{\min}$, se abre un nuevo clúster que comienza en la distancia del UE actual; si no, el UE se incorpora al clúster en curso. El procedimiento se cierra en una sola pasada lineal sobre los datos ya ordenados. El \cref{alg:clustering} formaliza el procedimiento.
+El procedimiento se presenta en el \cref{alg:clustering}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
-\caption{\emph{Clustering} ToA por distancia diferencial}
+\caption{\emph{Clustering} por distancia diferencial}
 \label{alg:clustering}
-\KwIn{$\Delta d[1..K]$ distancias diferenciales de los $K$ UEs colisionantes; $\Delta d_{\min}$ separación mínima entre clústeres}
-\KwOut{$\mathtt{clusterId}[1..K]$ asignación de cada UE a un clúster en $\{0, 1, \ldots, M-1\}$}
-$\mathtt{sortedIdx} \leftarrow \mathrm{argsort}(\Delta d)$ \tcp*[r]{ordenar por distancia ascendente}
-$\mathtt{clusterStart} \leftarrow \Delta d[\mathtt{sortedIdx}[1]]$\;
-$\mathtt{currentCluster} \leftarrow 0$\;
-$\mathtt{clusterId}[\mathtt{sortedIdx}[1]] \leftarrow 0$\;
-\For{$i \leftarrow 2$ \KwTo $K$}{
-  $\mathtt{idx} \leftarrow \mathtt{sortedIdx}[i]$\;
-  \If{$\Delta d[\mathtt{idx}] - \mathtt{clusterStart} \geq \Delta d_{\min}$}{
-    $\mathtt{currentCluster} \leftarrow \mathtt{currentCluster} + 1$ \tcp*[r]{abrir nuevo clúster}
-    $\mathtt{clusterStart} \leftarrow \Delta d[\mathtt{idx}]$\;
-  }
-  $\mathtt{clusterId}[\mathtt{idx}] \leftarrow \mathtt{currentCluster}$\;
+
+\KwIn{$\Delta d[1..K]$; $\Delta d_{\min}$}
+\KwOut{$\mathtt{clusterId}[1..K]$}
+
+$\mathtt{sortedIdx}\leftarrow\mathrm{argsort}(\Delta d)$\;
+
+$\mathtt{clusterStart}\leftarrow\Delta d[\mathtt{sortedIdx}[1]]$\;
+
+$\mathtt{currentCluster}\leftarrow0$\;
+
+$\mathtt{clusterId}[\mathtt{sortedIdx}[1]]\leftarrow0$\;
+
+\For{$i\leftarrow2$ \KwTo $K$}{
+
+    $\mathtt{idx}\leftarrow\mathtt{sortedIdx}[i]$\;
+
+    \If{$\Delta d[\mathtt{idx}]-\mathtt{clusterStart}\geq\Delta d_{\min}$}{
+
+        $\mathtt{currentCluster}\leftarrow\mathtt{currentCluster}+1$\;
+
+        $\mathtt{clusterStart}\leftarrow\Delta d[\mathtt{idx}]$\;
+
+    }
+
+    $\mathtt{clusterId}[\mathtt{idx}]\leftarrow\mathtt{currentCluster}$\;
+
 }
+
 \Return $\mathtt{clusterId}$\;
+
 \end{algorithm}
 
-\noindent\textbf{Complejidad:} $O(K \log K)$ dominada por la ordenación. La pasada lineal posterior es $O(K)$. La salida produce a lo sumo $\min(K, K_{\text{CB}})$ clústeres porque el número de \emph{codebooks} SCMA disponibles ($K_{\text{CB}} = 6$) actúa como techo operativo.
+\noindent\textbf{Complejidad:} $O(K\log K)$, dominada por el proceso de ordenamiento.
 
-\subsection{Lógica de decisión MSG3}
+\subsection{Resolución de las transmisiones MSG3}
 \label{sec:impl_decision}
 
-Tras la ventana de cuatro \emph{subframes} en la que llegan las transmisiones MSG3 superpuestas, el eNB debe decidir el destino de cada una. El problema es clasificar cada transmisión en una de cuatro categorías mutuamente excluyentes: \emph{scheduled} cuando es la única en su capa SCMA y por tanto no compite con nadie; \emph{contender\_ok} cuando comparte capa con otras pero el decodificador logra separarlas; \emph{pilot\_collision} cuando además del \emph{codebook} comparte el piloto DMRS con otra y queda indistinguible; y \emph{mpa\_fail} cuando comparte capa pero el decodificador no consigue separarlas.
+Una vez finaliza la ventana de recepción de MSG3, el eNB analiza todas las transmisiones recibidas para determinar el resultado de cada UE. Para ello identifica las capas SCMA ocupadas y los pilotos DMRS utilizados. Con esta información establece si el mensaje puede aceptarse directamente, si existe una colisión de piloto o si es necesario aplicar el modelo del decodificador MPA para intentar separar las señales superpuestas.
 
-El funcionamiento del algoritmo descansa en dos histogramas calculados al inicio: el conteo de pares (\emph{codebook}, piloto) y el conteo por \emph{codebook}. Con ellos, la clasificación de cada transmisión se decide en tres pasos: si su \emph{codebook} es único, queda \emph{scheduled} sin más; si su par (\emph{codebook}, piloto) se repite, se etiqueta \emph{pilot\_collision} porque no hay forma de distinguirlas; en cualquier otro caso, se consulta el factor graph para obtener la densidad efectiva $d_c$ en su elemento de recurso, se busca la probabilidad de éxito $p_{\text{BD}}(d_c)$ y se decide \emph{contender\_ok} o \emph{mpa\_fail} mediante un sorteo Bernoulli con esa probabilidad. El \cref{alg:decision} formaliza la operación.
+El procedimiento implementado se resume en el \cref{alg:decision}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
-\caption{Lógica de decisión MSG3 (CRACS-T)}
+\caption{Lógica de decisión para las transmisiones MSG3}
 \label{alg:decision}
-\KwIn{Conjunto $\mathcal{T}$ de transmisiones MSG3 recibidas; factor graph $\mathbf{F}_{4 \times 6}$}
-\KwOut{$\mathtt{decision}[t] \in \{\mathrm{SCHEDULED}, \mathrm{CONTENDER\_OK}, \mathrm{PILOT\_COLLISION}, \mathrm{MPA\_FAIL}\}$}
-$\mathtt{comboCounts} \leftarrow$ histograma de pares $(t.\mathtt{codebook}, t.\mathtt{dmrs})$ sobre $\mathcal{T}$\;
-$\mathtt{entriesPerCb} \leftarrow$ histograma de $t.\mathtt{codebook}$ sobre $\mathcal{T}$\;
-\ForEach{$t \in \mathcal{T}$}{
-  \uIf{$\mathtt{entriesPerCb}[t.\mathtt{codebook}] = 1$}{
-    $\mathtt{decision}[t] \leftarrow \mathrm{SCHEDULED}$ \tcp*[r]{único en su capa}
-  }
-  \uElseIf{$\mathtt{comboCounts}[(t.\mathtt{codebook}, t.\mathtt{dmrs})] > 1$}{
-    $\mathtt{decision}[t] \leftarrow \mathrm{PILOT\_COLLISION}$ \tcp*[r]{misma capa y piloto}
-  }
-  \Else{
-    $d_c \leftarrow \mathrm{computeDensity}(\mathbf{F}, \mathtt{comboCounts}, t)$\;
-    $p_{\text{BD}} \leftarrow \mathrm{pBlindDecoding}(d_c)$\;
-    $u \leftarrow \mathrm{Uniform}(0, 1)$\;
-    $\mathtt{decision}[t] \leftarrow (u < p_{\text{BD}})\ ?\ \mathrm{CONTENDER\_OK}\ :\ \mathrm{MPA\_FAIL}$\;
-  }
+
+\KwIn{Conjunto $\mathcal{T}$ de transmisiones MSG3 recibidas; factor graph $\mathbf{F}_{4\times6}$}
+\KwOut{$\mathtt{decision}[t]\in\{\mathrm{SCHEDULED},\mathrm{CONTENDER\_OK},\mathrm{PILOT\_COLLISION},\mathrm{MPA\_FAIL}\}$}
+
+$\mathtt{comboCounts}\leftarrow$ histograma de pares $(\mathtt{codebook},\mathtt{dmrs})$\;
+
+$\mathtt{entriesPerCb}\leftarrow$ histograma por $\mathtt{codebook}$\;
+
+\ForEach{$t\in\mathcal{T}$}{
+
+\uIf{$\mathtt{entriesPerCb}[t.\mathtt{codebook}]=1$}{
+
+$\mathtt{decision}[t]\leftarrow\mathrm{SCHEDULED}$\;
+
 }
+
+\uElseIf{$\mathtt{comboCounts}[(t.\mathtt{codebook},t.\mathtt{dmrs})]>1$}{
+
+$\mathtt{decision}[t]\leftarrow\mathrm{PILOT\_COLLISION}$\;
+
+}
+
+\Else{
+
+$d_c\leftarrow\mathrm{computeDensity}(\mathbf{F},\mathtt{comboCounts},t)$\;
+
+$p_{\mathrm{BD}}\leftarrow\mathrm{pBlindDecoding}(d_c)$\;
+
+$u\leftarrow\mathrm{Uniform}(0,1)$\;
+
+$\mathtt{decision}[t]\leftarrow(u<p_{\mathrm{BD}})
+?\,
+\mathrm{CONTENDER\_OK}
+:
+\mathrm{MPA\_FAIL}$\;
+
+}
+
+}
+
 \Return $\mathtt{decision}$\;
+
 \end{algorithm}
 
-\noindent\textbf{Complejidad:} $O(|\mathcal{T}|)$ dominada por la pasada sobre las transmisiones. La construcción de los histogramas y la consulta al factor graph son $O(1)$ amortizados.
+\noindent\textbf{Complejidad:} $O(|\mathcal{T}|)$.
 
-\subsection{Modelo abstracto del decodificador MPA}
-\label{sec:impl_mpa}
+Cuando varias transmisiones comparten una misma capa SCMA sin presentar colisión de piloto, el simulador utiliza un modelo probabilístico para representar el comportamiento del algoritmo MPA. En lugar de implementar el proceso iterativo completo, el éxito de la decodificación se aproxima mediante una probabilidad que depende del número de UEs que ocupan simultáneamente la misma capa.
 
-El decodificador SCMA basado en MPA debería simularse iterativamente sobre el grafo factorial, lo cual es costoso a nivel de sistema. El problema operativo es distinto: solo se necesita predecir si la decodificación tiene éxito o no, en función de la densidad efectiva $d_c$ en cada elemento de recurso. Por eso el simulador adopta una abstracción a nivel de sistema: una probabilidad de éxito $p_{\text{BD}}(d_c)$ tabulada en función de $d_c$.
-
-El funcionamiento es directo: dada la densidad efectiva, se devuelve la probabilidad correspondiente según una tabla con valores monótonamente decrecientes. Para los casos de baja contención ($d_c \le 2$) la decodificación es prácticamente segura; en el rango operativo nominal ($d_c \in \{3,4,5\}$) la probabilidad decrece desde $0{,}95$ hasta $0{,}70$; para densidades mayores, la curva continúa con un decaimiento exponencial acotado inferiormente por un piso de $0{,}05$ que evita probabilidades nulas en regímenes de contención muy alta. El \cref{alg:mpa} resume la operación.
+El modelo utilizado se presenta en el \cref{alg:mpa}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
-\caption{Modelo abstracto de la decodificación MPA}
+\caption{Modelo abstracto del decodificador MPA}
 \label{alg:mpa}
-\KwIn{$d_c$ densidad efectiva en el elemento de recurso (combos activos)}
-\KwOut{$p_{\text{BD}}$ probabilidad de éxito de la decodificación blind}
+
+\KwIn{$d_c$ densidad efectiva de usuarios sobre la capa SCMA}
+\KwOut{$p_{\mathrm{BD}}$}
+
 \Switch{$d_c$}{
-  \lCase{$0$}{$p_{\text{BD}} \leftarrow 1{,}00$ \tcp*[r]{caso degenerado}}
-  \lCase{$1$}{$p_{\text{BD}} \leftarrow 1{,}00$ \tcp*[r]{único, sin interferencia}}
-  \lCase{$2$}{$p_{\text{BD}} \leftarrow 1{,}00$ \tcp*[r]{decodificable sin pérdida}}
-  \lCase{$3$}{$p_{\text{BD}} \leftarrow 0{,}95$ \tcp*[r]{$d_f$ nominal}}
-  \lCase{$4$}{$p_{\text{BD}} \leftarrow 0{,}85$}
-  \lCase{$5$}{$p_{\text{BD}} \leftarrow 0{,}70$}
-  \lOther{$p_{\text{BD}} \leftarrow \max\bigl(0{,}05,\ 0{,}70 \cdot e^{-0{,}5\,(d_c - 5)}\bigr)$ \tcp*[r]{decaimiento exponencial con piso $0{,}05$}}
+
+\lCase{$0$}{$p_{\mathrm{BD}}\leftarrow1.00$}
+
+\lCase{$1$}{$p_{\mathrm{BD}}\leftarrow1.00$}
+
+\lCase{$2$}{$p_{\mathrm{BD}}\leftarrow1.00$}
+
+\lCase{$3$}{$p_{\mathrm{BD}}\leftarrow0.95$}
+
+\lCase{$4$}{$p_{\mathrm{BD}}\leftarrow0.85$}
+
+\lCase{$5$}{$p_{\mathrm{BD}}\leftarrow0.70$}
+
+\lOther{$p_{\mathrm{BD}}\leftarrow
+\max\!\left(0.05,\,
+0.70\,e^{-0.5(d_c-5)}
+\right)$}
+
 }
-\Return $p_{\text{BD}}$\;
+
+\Return $p_{\mathrm{BD}}$\;
+
 \end{algorithm}
 
-\noindent La forma del decaimiento exponencial para $d_c \geq 6$ extiende la curva monótona observable en SCMA y queda acotada inferiormente para evitar probabilidades nulas en regímenes de contención extrema. La justificación de la abstracción a nivel de sistema se discute en la \cref{sec:scma}.
+La probabilidad de éxito disminuye a medida que aumenta el número de UEs que comparten una misma capa SCMA. Esta aproximación reproduce el comportamiento esperado del algoritmo MPA con un costo computacional mucho menor que el de implementar el decodificador iterativo completo, por lo que resulta adecuada para simulaciones a nivel de sistema.
 
-\section{Configuración del escenario de pruebas}
-\label{sec:impl_escenarios}
+\subsection{Configuración experimental}
+\label{sec:impl_configuracion}
 
-El escenario de pruebas instancia el plan de evaluación del diseño en términos concretos del simulador: qué variables se manipulan, qué métricas se observan, qué combinaciones de parámetros se recorren y bajo qué condiciones estadísticas. La definición que sigue se apoya únicamente en las capacidades efectivamente expuestas por el simulador y en los KPIs reportados al final de cada corrida.
+Los escenarios definidos en el \cref{ch:diseno} se ejecutan utilizando la configuración de referencia presentada en la \cref{tab:impl_flags}. En cada escenario únicamente se modifica la variable bajo estudio, mientras que los demás parámetros permanecen constantes.
 
-\subsection{Variables manipuladas}
-\label{sec:impl_vars_indep}
+Las variantes \emph{\_high} repiten el escenario base bajo un perfil de tráfico intenso ($\lambda \approx 27{,}8$~UEs/s), con el fin de incrementar la cantidad de UEs que intentan acceder simultáneamente al canal. El escenario E7\_t300 evalúa el efecto del temporizador T300 utilizando los valores definidos por la especificación 3GPP TS~36.331.
 
-Las variables manipuladas en los experimentos corresponden a los siguientes parámetros del sistema descrito en el \cref{ch:diseno}:
-\begin{itemize}[leftmargin=*, noitemsep]
-  \item $K$: número de UEs activos en la ventana de acceso.
-  \item $h_{\text{sat}}$: altitud orbital del satélite.
-  \item $\alpha_{\min}$: ángulo de elevación mínimo de cobertura.
-  \item $\Delta d_{\min}$: distancia diferencial mínima entre clústeres ToA, aplicable a CRACS-T.
-  \item $N_{\text{pream}}$: tamaño del pool de preámbulos NPRACH disponibles, aplicado simultáneamente a los tres niveles CE para que el pool efectivo no dependa de la geometría del enlace. Las probabilidades del detector $(p_{\text{det}}, p_{\text{fa}}) = (0{,}975,\, 0{,}001)$ se mantienen fijas en el valor calibrado en estudios previos.
-  \item Esquema bajo prueba: Legacy, CRACS-R o CRACS-T (variable categórica).
-  \item Intensidad del tráfico: controlada conjuntamente por el preset de población y el perfil temporal, que determinan la tasa media $\lambda$ del proceso de arribos.
-\end{itemize}
+Cada combinación de parámetros se ejecuta con 30 semillas independientes y un tiempo de simulación de $T_{\mathrm{sim}}=120$~s. Los resultados se presentan como la media y su intervalo de confianza al 95\%, calculado mediante la distribución $t$ de Student.
 
-\subsection{Variables observadas}
-\label{sec:impl_vars_dep}
-
-Las variables observadas son los seis KPIs cuyas definiciones formales aparecen en la \cref{sec:design_kpis}: SAR, $T_{\text{access}}$, PCR\textsubscript{pre}, PCR\textsubscript{msg3}, RTX y CID. Cada KPI se reporta con su valor agregado por simulación en los archivos de salida del simulador, junto con los datos por UE que permiten reconstruir distribuciones detalladas.
-
-\paragraph{Reporte objetivo de la latencia:} el tiempo de acceso $T_{\text{access}}$, definido como el intervalo entre el primer preámbulo MSG1 y la recepción de MSG4, solo existe para los UEs que completan el procedimiento. Por eso, promediarlo de forma aislada introduce un sesgo de supervivencia: un esquema que abandona UEs reporta una latencia artificialmente baja, porque deja fuera los casos más costosos. Para una evaluación objetiva de la latencia ---siguiendo la práctica de la literatura de acceso aleatorio en NB-IoT y mMTC--- la latencia se reporta mediante tres instrumentos complementarios:
-\begin{enumerate}[leftmargin=*, noitemsep]
-  \item $T_{\text{access}}$ con su media, mediana y percentil~95, presentado siempre junto al SAR;
-  \item la función de distribución acumulada empírica del $T_{\text{access}}$, normalizada por el número total de UEs, de modo que la curva satura en el valor del SAR y el sesgo se hace explícito;
-  \item la probabilidad de entrega exitosa dentro de un plazo, $\mathrm{SDP}(T) = \#\{\text{UEs con } T_{\text{access}} \le T\} / N$, una métrica conjunta de confiabilidad y latencia evaluada en $T \in \{1,\;3,\;10\}$~s que no requiere asignar un tiempo de acceso ficticio a los UEs fallidos.
-\end{enumerate}
-Se complementa con el \emph{Total Service Time}, el tiempo total que el sistema necesita para resolver la oleada completa de solicitudes, reportado junto al SAR alcanzado.
-
-\subsection{Mapeo de los escenarios al simulador}
-\label{sec:impl_mapeo}
-
-El plan de escenarios de evaluación (\cref{tab:escenarios}) se ejecuta sobre el simulador con los valores de referencia de la \cref{tab:impl_flags}; los valores exactos de cada barrido se reportan junto a su análisis en el \cref{ch:resultados}. Cada combinación se recorre con 30 semillas independientes para construir intervalos de confianza al 95\% basados en la distribución $t$ de Student con $n-1$ grados de libertad.
-
-Las variantes \emph{\_high} (E1\_high, E4\_high, E5\_high) reproducen el barrido de su escenario base bajo el perfil de tráfico intenso ($\lambda \approx 27{,}8$~UEs/s, $\sim$8,9~UEs por ventana NPRACH). A diferencia de un simple aumento de $K$, este perfil eleva la densidad de arribos por ventana de acceso, que es la magnitud que satura realmente el canal de acceso aleatorio y permite separar los esquemas. El escenario E7\_t300 barre el temporizador T300 en el punto de operación de cruce CRACS-R / CRACS-T (E6\_burst $K{=}300$); los tres valores barridos corresponden al rango estándar NB-IoT definido en 3GPP TS~36.331.
-
-Para cada escenario, el resto de los parámetros se mantiene en su valor de referencia listado en la \cref{tab:impl_flags}.
-
-\subsection{Condiciones estadísticas y de ejecución}
-\label{sec:impl_estadistica}
-
-\begin{itemize}[leftmargin=*, noitemsep]
-  \item \emph{Repeticiones por punto experimental:} cada combinación se ejecuta con 30 semillas independientes, lo que permite reportar la media y un intervalo de confianza al 95\% basado en la distribución $t$ de Student con $n-1$ grados de libertad.
-  \item \emph{Resolución de los barridos:} las curvas de sensibilidad (E1, E4, E5) se construyen con al menos cuatro valores distribuidos en el rango declarado, según se observa en la \cref{tab:escenarios}; en barridos de un solo orden de magnitud la distribución es uniforme y en barridos que cubren un factor mayor a $10\times$ (como $\Delta d_{\min}$, que va de $50$ a $1\,000$~m, factor $20\times$) la distribución se densifica hacia el extremo bajo, donde se espera mayor sensibilidad.
-  \item \emph{Duración de cada simulación:} el tiempo simulado por experimento se fija en $T_{\text{sim}} = 120$~s, valor suficiente para que los UEs completen su procedimiento o agoten sus reintentos bajo los parámetros de referencia.
-  \item \emph{Reproducibilidad:} la combinación semilla-corrida se ata al estado interno del generador de números aleatorios del simulador, garantizando que dos ejecuciones con la misma combinación produzcan resultados idénticos bit a bit.
-\end{itemize}
-
-\section{Procedimiento de recolección de datos}
-\label{sec:impl_recoleccion}
-
-La recolección de datos se articula en dos etapas que separan la salida del simulador del post-procesado estadístico.
-
-\paragraph{Salida del simulador:} para cada ejecución el simulador deposita en disco tres archivos en formato CSV con el mismo esquema columnar para los tres esquemas, lo que facilita la comparación posterior. El primero registra los eventos del procedimiento (transmisión y recepción de MSG1 a MSG5, decisión MPA, motivo de descarte cuando aplica) con marcas de tiempo y metadatos relevantes (\emph{codebook}, piloto DMRS, decisión). El segundo entrega una fila por UE con su trayectoria resumida: número de intentos MSG1, latencia, estado final y asignación de clúster verdadera y observada para CID. El tercero entrega una fila agregada por simulación con los seis KPIs del diseño: tasa de acceso exitoso (SAR y SAR al primer intento), latencia de acceso (media, mediana y percentil 95), tasa de colisión de preámbulo (PCR\textsubscript{pre}) y de piloto MSG3 (PCR\textsubscript{msg3}), tasa de retransmisión (RTX media y máxima) y tasa de identificación de clúster (CID). La centralización del cálculo en un único punto interno garantiza que los KPIs sean coherentes entre esquemas y evita duplicación de la lógica de agregación.
-
-\paragraph{Post-procesado:} las salidas de todas las ejecuciones de un escenario se consolidan en una tabla agrupada por la combinación (esquema, valor de la variable barrida). Sobre cada grupo se calcula la media y un intervalo de confianza al 95\% basado en la distribución $t$ de Student con $n-1$ grados de libertad. Las figuras de sensibilidad (curvas de SAR, latencia y demás KPIs frente a la variable manipulada) se construyen con bandas de incertidumbre. Los contrastes de significancia entre esquemas se realizan con la prueba de los rangos con signo de Wilcoxon, pareada por semilla. Esta elección se justifica por dos razones: las distribuciones de SAR saturan cerca de 1 en regímenes moderados, lo que produce diferencias claramente no gaussianas y desaconseja pruebas paramétricas; y la prueba de Wilcoxon es la convención en estudios a nivel de sistema de NB-IoT y mMTC \cite{sanchez2019nbiotra, harwahyu2019powerra}.
+Durante cada ejecución el simulador registra los eventos del procedimiento de acceso y genera archivos en formato CSV con la información necesaria para calcular los KPIs definidos en el Capítulo~3. Posteriormente, los resultados de todas las corridas se consolidan para construir las curvas y tablas presentadas en el capítulo de resultados. La comparación entre esquemas se realiza mediante la prueba de rangos con signo de Wilcoxon.
 
 \section{Validación de la implementación}
 \label{sec:impl_validacion}
 
-La validación de la implementación busca garantizar que el simulador refleja fielmente el comportamiento descrito en el diseño y que los resultados posteriores se deben al sistema bajo prueba y no a defectos de implementación. La estrategia se apoya en cuatro chequeos, todos verificados durante la campaña experimental.
+Antes de ejecutar la campaña experimental se verifica el funcionamiento del simulador mediante un conjunto de pruebas básicas. En primer lugar, se comprueba que para el caso $K=1$ los tres esquemas producen el mismo comportamiento, ya que no existe posibilidad de colisión. También se verifica que todos los indicadores permanezcan dentro de sus dominios válidos y que dos ejecuciones realizadas con la misma semilla generen resultados idénticos.
 
-\paragraph{Coherencia en condición de borde:} en el caso $K=1$ no puede ocurrir colisión por definición. El escenario E0 confirmó este invariante: los tres esquemas convergen a $\mathrm{SAR}=1{,}000$ con dispersión nula y a la misma latencia de acceso, igual al RTT extendido del enlace (\cref{tab:res_e0}). La traza de eventos en esa condición muestra la secuencia completa MSG1--MSG5 sin que se activen las ramas de fallo.
-
-\paragraph{Equivalencia inter-esquema en ausencia de colisión:} cuando todos los UEs ocupan preámbulos distintos en MSG1, ninguno de los tres esquemas debería activar sus mecanismos diferenciales. La equivalencia se verificó comparando las trayectorias por UE bajo la misma semilla en condiciones de baja carga; las diferencias quedan dentro de la aleatoriedad del tráfico y no muestran asimetrías estructurales atribuibles al esquema.
-
-\paragraph{Verificación de rangos:} cada KPI debe respetar su dominio matemático: SAR y CID en $[0, 1]$; $T_{\text{access}}$ acotada inferiormente por el RTT mínimo del enlace; PCR y RTX en $[0, +\infty)$ con valor ratio en $[0, 1]$ donde aplica. La auditoría posterior a la campaña de 4\,260 corridas verificó la totalidad de los valores numéricos reportados en el \cref{ch:resultados} contra los archivos de salida del simulador y no encontró ningún KPI fuera de su dominio matemático.
-
-\paragraph{Reproducibilidad:} dos ejecuciones con la misma semilla deben producir resultados idénticos bit a bit. Esto se verificó mediante comparación de las firmas de los archivos de salida. La reproducibilidad es condición necesaria para que los intervalos de confianza tengan sentido.
-
-\paragraph{Cobertura de las condiciones de borde:} además de los chequeos anteriores, el procedimiento de validación incluye ejecuciones explícitas en las zonas frontera del espacio de parámetros que el sistema podría visitar en operación: el caso de UE único ($K = 1$), donde no puede ocurrir colisión y los tres esquemas deben converger; el caso de carga superior al número de \emph{codebooks} SCMA ($K > K_{\text{CB}} = 6$), que delimita el rango operativo nominal de CRACS-T; el caso en que todos los UEs caen dentro de un mismo clúster ($\Delta d < \Delta d_{\min}$), donde se espera que el comportamiento de CRACS-T converja al de CRACS-R; y el caso de detección imperfecta ($p_{\text{fa}} > 0$), que valida la propagación de la incertidumbre del detector probabilístico hasta los KPIs.
-
-Adicionalmente, las tendencias cualitativas observadas en la fase experimental se contrastan con los hallazgos publicados en la literatura relacionada (Liang \emph{et al.}, 2017; Wang \emph{et al.}, 2020), aunque los valores absolutos no son comparables debido a las diferencias en el modelo de canal y en la decodificación. La calibración estricta de constantes está fuera del alcance de la validación funcional.
-
-\section{Cierre del capítulo}
-\label{sec:impl_cierre}
-
-La implementación del simulador integra componentes reutilizados del módulo LTE de ns-3 con módulos nuevos que llevan a la práctica los aportes algorítmicos del trabajo: el detector probabilístico de colisión, el \emph{clustering} por tiempo de llegada, la lógica de decisión MSG3 con cuatro categorías, el modelo abstracto de decodificación MPA y el sistema interno de reportería. Cada componente es trazable a una sección del diseño y se documenta mediante pseudocódigo y configuraciones explícitas.
-
-Con la implementación funcional y validada según el procedimiento descrito en la \cref{sec:impl_validacion}, queda preparado el escenario para la fase experimental. El análisis de los resultados obtenidos al ejecutar los escenarios E0--E7 sobre el simulador descrito, así como su contraste contra las hipótesis y los criterios de aceptación formulados en el \cref{ch:diseno}, corresponden al capítulo posterior de Resultados y Análisis.
+Adicionalmente, se evalúan las principales condiciones de borde del sistema: cargas superiores al número de \emph{codebooks} disponibles, formación de un único clúster y presencia de falsas alarmas en el detector probabilístico. Finalmente, las tendencias obtenidas se comparan cualitativamente con resultados reportados en la literatura para comprobar que el comportamiento observado sea consistente con trabajos previos.

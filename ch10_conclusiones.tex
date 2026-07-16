@@ -1,55 +1,38 @@
 \chapter{Conclusiones y trabajo futuro}
 \label{ch:conclusiones}
 
-\begin{center}
-\fbox{\textbf{\textsf{[BORRADOR --- capítulo pendiente de revisión del director]}}}
-\end{center}
-\medskip
+\section{Conclusiones}
 
-Este trabajo se propuso caracterizar cuánta capacidad del canal de acceso aleatorio se puede alcanzar al aplicar acceso no ortogonal sobre una red NB-IoT que usa satélites LEO como infraestructura de acceso, y cómo se degrada esa capacidad bajo las condiciones propias del enlace y de la detección de colisiones. Para responderlo se diseñaron dos esquemas de la familia CRACS ---CRACS-R, con asignación aleatoria de codebook, y CRACS-T, con agrupamiento por tiempo de llegada y asignación determinista--- y se compararon contra el procedimiento Legacy del estándar. Ambos se implementaron sobre un simulador a nivel de sistema en ns-3 (\cref{ch:implementacion}) y se evaluaron en una campaña de 4\,260 corridas (\cref{ch:resultados}). Este capítulo resume las conclusiones, contrasta lo obtenido con los objetivos y plantea las líneas de trabajo futuro.
+Esta investigación permitió caracterizar el comportamiento del canal de acceso aleatorio de una red NB-IoT soportada por infraestructura satelital LEO cuando se incorporan mecanismos de acceso no ortogonal basados en SCMA. Los resultados obtenidos muestran que este tipo de esquemas constituye una alternativa efectiva para incrementar la capacidad del procedimiento de acceso respecto al mecanismo ortogonal convencional, especialmente en escenarios con una alta concentración de dispositivos que compiten simultáneamente por los recursos del NPRACH.
 
-\section{Síntesis y respuesta a la pregunta de investigación}
-\label{sec:concl_sintesis}
+La comparación entre los tres esquemas evaluados evidencia que tanto CRACS-R como CRACS-T superan al procedimiento Legacy en los principales indicadores de desempeño analizados. En condiciones de carga moderada e intensa, ambos mantienen una tasa de acceso exitoso cercana al máximo alcanzable y reducen significativamente el retardo asociado al establecimiento de la conexión, demostrando que la recuperación de usuarios colisionados permite aprovechar de manera más eficiente los recursos disponibles del canal de acceso.
 
-La conclusión central es que el acceso no ortogonal con SCMA aumenta de forma clara la capacidad del canal de acceso aleatorio respecto al esquema Legacy, pero la mejor de las dos propuestas depende del régimen de operación. En carga moderada e intensa hasta $K=100$, las dos propuestas admiten prácticamente a todos los UEs (SAR cercana a 1), mientras Legacy empieza a perder accesos; en ese rango la diferencia entre CRACS-R y CRACS-T no es de capacidad bruta sino de eficiencia de acceso, y CRACS-T es claramente superior en latencia. En saturación extrema, en cambio, la jerarquía se invierte: CRACS-R admite más UEs que CRACS-T en tasa de acceso, aunque CRACS-T resuelve más rápido a los que sí accede.
+Los resultados también muestran que la asignación determinista de codebooks propuesta en CRACS-T constituye una estrategia más eficiente para disminuir la latencia del procedimiento de acceso, al reducir la probabilidad de reutilización conflictiva de los recursos SCMA. Sin embargo, esta ventaja no se mantiene en todos los escenarios evaluados. Bajo condiciones de saturación extrema, CRACS-R presenta una mayor tasa de acceso exitoso cuando el temporizador $T_{300}$ conserva el valor definido por defecto en el estándar.
 
-La hipótesis \emph{ex-ante} de inclusión estricta entre las regiones operativas de los tres esquemas (\cref{sec:design_regiones}) se cumple en 38 de los 42 puntos evaluados, pero no de forma global: la ventaja de CRACS-T sobre CRACS-R en tasa de acceso solo se sostiene cuando el temporizador $T_{300}$ se ajusta por encima del valor por defecto del estándar. Esta dependencia, que no se anticipó en el diseño y solo apareció en los datos, es el aporte menos esperado y más útil del trabajo, porque convierte un parámetro de protocolo en una condición de despliegue de la propuesta.
+Uno de los principales aportes de esta investigación fue identificar que el desempeño relativo entre CRACS-R y CRACS-T depende directamente de la configuración del temporizador $T_{300}$. Durante la etapa de diseño se planteó como hipótesis que CRACS-T dominaría completamente a CRACS-R; sin embargo, los experimentos demostraron que esta afirmación únicamente se cumple cuando dicho temporizador se incrementa por encima del valor estándar. Este comportamiento no había sido considerado inicialmente y constituye un resultado relevante, ya que evidencia que parámetros propios del protocolo pueden modificar de manera importante el comportamiento de los mecanismos de acceso no ortogonal.
 
-\section{Principales hallazgos}
-\label{sec:concl_hallazgos}
+De igual forma, el mecanismo de agrupamiento basado en tiempo de llegada mostró un comportamiento estable dentro del rango de parámetros evaluado, lo que indica que la propuesta presenta una baja sensibilidad frente a la selección del umbral de agrupamiento utilizado para formar los clústeres. Este resultado simplifica la configuración práctica del esquema y favorece su utilización bajo diferentes condiciones de operación.
 
-Los resultados del \cref{ch:resultados} se pueden resumir en cinco puntos:
+Las tendencias observadas durante toda la campaña experimental permiten concluir que la incorporación de técnicas de acceso no ortogonal representa una alternativa viable para aumentar la capacidad del acceso aleatorio en redes NB-IoT sobre enlaces satelitales LEO. Aunque el modelo considerado corresponde a un escenario controlado de simulación y presenta las limitaciones propias descritas en el Capítulo~\ref{ch:resultados}, los resultados obtenidos permiten establecer criterios sobre el comportamiento esperado de este tipo de mecanismos y proporcionan una base para futuras investigaciones en redes no terrestres.
 
-\begin{enumerate}[leftmargin=*]
-  \item \textbf{Coherencia del modelo.} En ausencia de contención ($K=1$), los tres esquemas convergen al mismo resultado (SAR\,=\,1, igual latencia), lo que descarta sesgos de implementación ajenos a la dinámica de colisiones.
-  \item \textbf{Ganancia en eficiencia de acceso.} Hasta $K=100$, CRACS-T redujo la latencia de acceso del baseline Legacy en un factor de $13{,}6\times$ bajo tráfico moderado y de $4{,}5\times$ bajo tráfico intenso, y mantuvo una probabilidad de éxito antes de 3~s por encima de $0{,}99$ frente a $0{,}32$ de Legacy. La separación CRACS-T/CRACS-R en latencia fue estadísticamente significativa desde $K=75$.
-  \item \textbf{Robustez del agrupamiento.} El parámetro $\Delta d_{\min}$ no resultó sensible en el rango $[50,1000]$~m: el agrupamiento de CRACS-T satura el techo de codebooks en todos los valores probados, lo que valida el valor por defecto de 150~m y deja la tasa de identificación de clúster por debajo del $3{,}5\%$.
-  \item \textbf{Costo de la asignación aleatoria.} Al ampliar el pool de preámbulos, CRACS-R mostró una caída no monótona del acceso al primer intento (hasta $-45{,}6\%$), mientras CRACS-T se mantuvo estable. La asignación determinista de codebook por clúster evita el reuso aleatorio del recurso SCMA que penaliza a CRACS-R.
-  \item \textbf{Sensibilidad al temporizador $T_{300}$.} La dominancia de CRACS-T sobre CRACS-R en tasa de acceso se restablece con $T_{300} \geq 10$~s. Una prueba A/B controlada descartó que la inversión observada se debiera a cambios de código, lo que permite atribuirla al valor del timer.
-\end{enumerate}
-
-\section{Cumplimiento de los objetivos}
-\label{sec:concl_objetivos}
-
-El trabajo cumplió su objetivo de caracterizar la capacidad del canal de acceso no ortogonal bajo un enlace LEO y de cuantificar su degradación con la carga y con la detección de colisiones. De los cinco criterios de aceptación definidos en el diseño (\cref{sec:design_criterios}), cuatro se cumplen plenamente y uno (la mejora en tasa de acceso de CRACS-T sobre CRACS-R) se cumple solo cuando $T_{300} \geq 10$~s. Esa condición no se interpreta como una falla del diseño, sino como un requisito operativo de CRACS-T que el trabajo deja documentado: para tráfico de ráfaga saturado con el $T_{300}$ por defecto del estándar, CRACS-R es la opción de mayor tasa de acceso, mientras que CRACS-T conviene cuando la prioridad es la baja latencia y se puede ajustar el temporizador.
-
-\section{Limitaciones}
-\label{sec:concl_limitaciones}
-
-Las conclusiones anteriores deben leerse dentro del alcance del modelo, detallado en la \cref{sec:res_limitaciones}: canal en línea de vista con pérdidas constantes (sin desvanecimiento, sombreado ni Doppler), un único satélite sin \emph{handover}, geometría LEO fija, detector de colisiones evaluado solo en su punto calibrado y carga acotada a $K=1000$ UEs por punto, frente a los $30\,000$ del caso nominal de 3GPP TR~37.868 \cite{tr37868}. Por eso los valores absolutos no son directamente comparables con medidas de campo, aunque las tendencias cualitativas sí concuerdan con la literatura de acceso no ortogonal \cite{yu2017nora, wang2020nbnora}.
+Finalmente, esta investigación responde la pregunta planteada al inicio del trabajo al demostrar que la capacidad del canal de acceso aleatorio puede incrementarse mediante mecanismos de acceso no ortogonal; sin embargo, dicho incremento depende tanto de la estrategia empleada para resolver las colisiones como de la configuración de determinados parámetros del procedimiento de acceso. En consecuencia, el diseño de futuras soluciones para redes NTN deberá considerar de manera conjunta los algoritmos de acceso y los parámetros de operación definidos por el protocolo, ya que ambos influyen de forma directa sobre el desempeño final del sistema.
 
 \section{Trabajo futuro}
-\label{sec:concl_futuro}
 
-A partir de estas limitaciones se identifican las siguientes líneas de trabajo futuro:
+Los resultados obtenidos abren diversas posibilidades de investigación que permitirían ampliar el alcance de este trabajo.
 
-\begin{itemize}[leftmargin=*]
-  \item \textbf{Modelo de canal más realista.} Incorporar desvanecimiento (Rician/Rayleigh), sombreado y desplazamiento Doppler, así como antenas con patrón de radiación, para medir cuánto se aparta la capacidad de la obtenida bajo condiciones ideales de canal.
-  \item \textbf{Escalamiento a carga nominal.} Extender la campaña hasta $K=30\,000$ UEs por punto, lo que exige optimizar el simulador o paralelizarlo de forma más agresiva, para confirmar las tendencias en el rango completo de 3GPP.
-  \item \textbf{Sensibilidad del detector de colisiones.} Barrer las probabilidades de detección y de falsa alarma $(p_{\text{det}}, p_{\text{fa}})$ para cuantificar cómo se degrada la capacidad de las propuestas cuando la detección es imperfecta.
-  \item \textbf{Refinamiento del temporizador $T_{300}$.} Barrer valores intermedios del estándar (2{,}5, 4, 6 y 8~s) para ubicar con precisión la transición de CRACS-T entre 5 y 10~s y proponer un valor de $T_{300}$ recomendado para cada régimen de tráfico.
-  \item \textbf{Distribución espacial no uniforme.} Evaluar el agrupamiento de CRACS-T ante distribuciones agrupadas de UEs, más cercanas a despliegues reales, y ante constelaciones con varios satélites y \emph{handover}.
-  \item \textbf{Selección adaptativa de esquema.} Dado el compromiso de régimen entre CRACS-R y CRACS-T, estudiar una política que elija el esquema (o el valor de $T_{300}$) en función de la carga estimada en cada ventana de visibilidad del satélite.
+\begin{itemize}
+
+\item Incorporar modelos de canal más realistas que incluyan desvanecimiento Rician, sombreado, desplazamiento Doppler residual y variaciones temporales del enlace, con el fin de analizar el comportamiento de las propuestas bajo condiciones más cercanas a una implementación práctica.
+
+\item Extender el escenario de simulación hacia cargas equivalentes a las consideradas por 3GPP para comunicaciones masivas, mediante la optimización y paralelización del simulador, con el propósito de verificar si las tendencias observadas se mantienen en escenarios de mayor escala.
+
+\item Evaluar el impacto de diferentes niveles de precisión del detector de colisiones, considerando simultáneamente probabilidades de detección y falsas alarmas, para cuantificar la sensibilidad de los mecanismos propuestos frente a errores de clasificación.
+
+\item Analizar con mayor detalle el efecto del temporizador $T_{300}$, incorporando valores intermedios dentro del rango permitido por el estándar, con el objetivo de establecer configuraciones recomendadas según el régimen de tráfico de la red.
+
+\item Estudiar escenarios con distribuciones espaciales no uniformes de dispositivos, múltiples satélites y procedimientos de \textit{handover}, que permitan aproximarse con mayor fidelidad a despliegues reales de redes NTN.
+
+\item Investigar mecanismos adaptativos capaces de seleccionar dinámicamente el esquema de acceso o ajustar automáticamente parámetros como el temporizador $T_{300}$ de acuerdo con la carga estimada de la red y las condiciones instantáneas del canal.
+
 \end{itemize}
-
-En conjunto, el trabajo muestra que el acceso no ortogonal con SCMA es una vía viable para ampliar la capacidad del canal de acceso aleatorio de NB-IoT sobre satélites LEO, y que la elección entre una asignación aleatoria y una determinista de los recursos SCMA no es absoluta, sino que depende de la carga y de la configuración del temporizador de contención. Caracterizar ese compromiso es la principal contribución de esta tesis y el punto de partida natural para los trabajos que la continúen.

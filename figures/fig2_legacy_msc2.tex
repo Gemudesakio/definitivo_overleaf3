@@ -1,0 +1,180 @@
+% Fig. 2b - Escenario de colisión en Legacy
+% Compile: pdflatex fig2_legacy_collision.tex
+
+\documentclass[border=5pt]{standalone}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+
+\begin{document}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    font=\small,
+    entity/.style={
+        draw,
+        rectangle,
+        minimum width=2cm,
+        minimum height=0.55cm,
+        fill=black!5,
+        font=\small\bfseries,
+        thick
+    },
+    msg/.style={
+        ->,
+        semithick
+    },
+    step/.style={
+        font=\small\bfseries\itshape,
+        text=black!65,
+        anchor=east
+    },
+    sidenote/.style={
+        font=\small\itshape,
+        text=black!70,
+        align=left
+    },
+    callout/.style={
+        draw=black!40,
+        fill=black!3,
+        rounded corners=2pt,
+        inner sep=4pt,
+        font=\small,
+        align=left,
+        line width=0.4pt,
+        text width=5cm
+    }
+]
+
+% Entidades
+\node[entity] (ue1) at (0,0) {UE$_1$};
+\node[entity] (ue2) at (2.5,0) {UE$_2$};
+\node[entity] (enb) at (8,0) {eNB};
+
+% Líneas de vida
+\draw[dashed, black!30, thin] (0,-0.3) -- (0,-10.3);
+\draw[dashed, black!30, thin] (2.5,-0.3) -- (2.5,-10.3);
+\draw[dashed, black!30, thin] (8,-0.3) -- (8,-10.3);
+
+% -----------------------------------------------------------------
+% Paso 1: transmisión de MSG1
+% -----------------------------------------------------------------
+
+\node[step] at (-1.7,-0.85) {Paso 1};
+
+\node[sidenote, anchor=north east] at (-0.3,-1.15)
+    {Ambos UEs eligen\\el mismo preámbulo};
+
+\draw[msg]
+    (0,-1.0)
+    --
+    node[sloped, above, font=\small, pos=0.5]
+    {MSG1: Preamble (RAPID $r$)}
+    (8,-1.8);
+
+\draw[msg]
+    (2.5,-1.95)
+    --
+    (8,-2.5);
+
+\node[callout, anchor=north west] at (8.3,-1.7)
+    {\textbf{Evento en el eNB:}\\
+     colisión no detectada};
+
+% -----------------------------------------------------------------
+% Paso 2: transmisión de MSG2
+% -----------------------------------------------------------------
+
+\node[step] at (-1.7,-3.55) {Paso 2};
+
+\node[sidenote, anchor=north east] at (-0.3,-3.85)
+    {El eNB envía un único\\RAR para el RAPID $r$};
+
+\draw[msg]
+    (8,-3.7)
+    --
+    node[sloped, above, font=\small, pos=0.5]
+    {MSG2: RAR (un único TC-RNTI)}
+    (0,-4.5);
+
+\draw[msg]
+    (8,-4.4)
+    --
+    (2.5,-4.95);
+
+\node[sidenote, anchor=north west] at (8.3,-4.7)
+    {Ambos UEs reciben\\el mismo RAR};
+
+% -----------------------------------------------------------------
+% Paso 3: transmisión simultánea de MSG3
+% -----------------------------------------------------------------
+
+\node[step] at (-1.7,-5.85) {Paso 3};
+
+\node[sidenote, anchor=north east] at (-0.3,-6.15)
+    {Ambos UEs transmiten\\en el mismo recurso};
+
+\draw[msg]
+    (0,-6.0)
+    --
+    node[sloped, above, font=\small, pos=0.5]
+    {MSG3 sobre el mismo recurso}
+    (8,-6.8);
+
+\draw[msg]
+    (2.5,-6.95)
+    --
+    (8,-7.5);
+
+\node[callout, anchor=north west] at (8.3,-6.7)
+    {\textbf{Evento en el eNB:}\\
+     superposición de MSG3;\\
+     ninguno puede decodificarse};
+
+% -----------------------------------------------------------------
+% Paso 4: fallo del procedimiento
+% -----------------------------------------------------------------
+
+\node[step] at (-1.7,-8.55) {Paso 4};
+
+\node[sidenote, anchor=north east] at (-0.3,-8.85)
+    {No se recibe MSG4};
+
+\draw[
+    ->,
+    semithick,
+    red!60!black,
+    dashed
+]
+    (8,-8.6)
+    --
+    node[
+        sloped,
+        above,
+        font=\small,
+        text=red!60!black,
+        pos=0.4
+    ]
+    {Sin respuesta}
+    (0,-9.4);
+
+\draw[
+    ->,
+    semithick,
+    red!60!black,
+    dashed
+]
+    (8,-9.3)
+    --
+    (2.5,-9.85);
+
+\node[
+    font=\small\bfseries,
+    text=red!60!black
+] at (4,-10.6)
+    {Ambos UEs fallan --- backoff y reintento};
+
+\end{tikzpicture}
+
+\end{document}
