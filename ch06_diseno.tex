@@ -66,7 +66,7 @@ RF-05 & El sistema debe calcular y registrar las métricas de desempeño necesar
 \subsection{Requerimientos no funcionales}
 \label{sec:rnf}
 
-La \cref{tab:rnf} lista los requerimientos no funcionales. Se expresan como criterios cuantificables verificables contra las métricas de desempeño definidas en la \cref{sec:design_kpis}.
+La \cref{tab:rnf} lista los requerimientos no funcionales.
 
 \begin{table}[H]
 \centering
@@ -158,9 +158,9 @@ Las pérdidas atmosféricas ($L_{\mathrm{atm}}$) y el margen de implementación 
 
  Ambos esquemas comparten un núcleo común sobre el procedimiento tradicional de acceso aleatorio NB-IoT: (i) un detector probabilístico de colisiones de preámbulo en el eNB, (ii) una multiplexación T-SCMA del \textit{payload} MSG3 que permite la resolución simultánea de múltiples UEs mediante decodificación MPA, y (iii) la individualización por IMSI en MSG4 cuando varios UEs comparten TC-RNTI. La diferencia entre los dos esquemas radica en la estrategia de asignación de codebook SCMA tras detectar una colisión.
 
-\textbf{CRACS-R}: Adapta el principio de SARA (Moon et al., 2021) al contexto NB-IoT NTN incorporando SCMA: tras detectar colisión, el eNB emite dos RARs anunciando el catálogo completo de \textit{codebooks}; cada UE elige aleatoriamente un codebook y un piloto DMRS. Es un esquema sin información geométrica adicional, dependiente del azar y de la separación posterior por MPA.
+\textbf{CRACS-R}: Adapta el principio de SARA~\cite{ref9} al contexto NB-IoT NTN incorporando SCMA: tras detectar colisión, el eNB emite dos RARs anunciando el catálogo completo de \textit{codebooks}; cada UE elige aleatoriamente un codebook y un piloto DMRS. Es un esquema sin información geométrica adicional, dependiente del azar y de la separación posterior por MPA.
 
-\textbf{CRACS-T}: Extiende el principio NORA  ~\cite{ref4} incorporando un agrupamiento espacial de los UEs colisionantes basado en su distancia diferencial al satélite, y \emph{asignación determinista} del codebook SCMA por clúster: tras detectar colisión, el eNB analiza los tiempos de llegada de los preámbulos superpuestos, los agrupa en clústeres espaciales y emite una RAR por clúster con TC-RNTI compartido y codebook fijo asignado. Aprovecha la geometría LEO para reducir la contienda residual en las etapas posteriores del procedimiento.
+\textbf{CRACS-T}: Extiende el principio NORA ~\cite{ref4} incorporando un agrupamiento espacial de los UEs colisionantes basado en su distancia diferencial al satélite, y \emph{asignación determinista} del codebook SCMA por clúster: tras detectar colisión, el eNB analiza los tiempos de llegada de los preámbulos superpuestos, los agrupa en clústeres espaciales y emite una RAR por clúster con TC-RNTI compartido y codebook fijo asignado. Aprovecha la geometría LEO para reducir la contienda residual en las etapas posteriores del procedimiento.
 
 La \cref{tab:esquemas} contrasta los tres esquemas considerados en este trabajo: el \textit{Legacy }y las dos propuestas CRACS-R y CRACS-T.
 

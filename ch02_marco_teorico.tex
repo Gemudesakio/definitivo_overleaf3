@@ -255,14 +255,14 @@ recibida y es especialmente útil en escenarios de acceso masivo con transmisió
 
 SCMA pertenece a la familia de técnicas de acceso múltiple no ortogonal en el dominio del
 código de baja densidad (LDCD-NOMA,
-\textit{Low-Density Code-Domain NOMA})~\cite{ref10, ref17}. Su idea principal es asignar a
+\textit{Low-Density Code-Domain NOMA})~\cite{ref9, ref10}. Su idea principal es asignar a
 cada dispositivo un \textit{codebook}, que corresponde a una matriz compleja dispersa. Ese
 \textit{codebook} define a qué subportadoras del enlace ascendente se asignan los símbolos de
 datos del usuario. Lo clave de esa asignación es su escasez (\textit{sparsity}), ya que cada
 \textit{codebook} usa solo unas pocas de las subportadoras disponibles y deja las demás en
 cero. Gracias a esto, varios dispositivos con \textit{codebooks} diferentes pueden transmitir
 al mismo tiempo sobre las mismas subportadoras sin que sus señales sean iguales, porque cada
-uno usa un patrón de subportadoras distinto~\cite{ref10, ref17}. Por ejemplo, si hay cuatro
+uno usa un patrón de subportadoras distinto~\cite{ref9, ref10}. Por ejemplo, si hay cuatro
 subportadoras y cada \textit{codebook} usa solo dos, se pueden superponer hasta seis usuarios
 sobre los mismos recursos de frecuencia con patrones distintos, lo que aumenta de forma
 notable la capacidad del sistema comparado con el acceso ortogonal.
@@ -271,7 +271,7 @@ Para separar las señales superpuestas en el receptor se usa el algoritmo de pas
 mensajes (MPA, \textit{Message Passing Algorithm}), que trabaja sobre una representación
 del sistema como un grafo bipartito\footnote{Un grafo bipartito es aquel cuyos nodos se
 dividen en dos conjuntos disjuntos, de modo que toda arista conecta un nodo de un conjunto
-con uno del otro y nunca dos nodos del mismo conjunto.}~\cite{ref10, ref17}. En ese grafo
+con uno del otro y nunca dos nodos del mismo conjunto.}~\cite{ref9, ref10}. En ese grafo
 hay dos tipos de nodos: los nodos variables, que representan los dispositivos activos, y los
 nodos función, que representan las subportadoras compartidas. Una arista conecta un
 dispositivo con una subportadora cuando su \textit{codebook} la usa. Sobre esa estructura,
@@ -280,9 +280,9 @@ las estimaciones de probabilidad sobre los símbolos transmitidos hasta llegar a
 Lo importante es que, como el grafo es disperso ---cada dispositivo está conectado a pocas
 subportadoras y cada subportadora es compartida por pocos dispositivos---, la complejidad
 computacional se reduce significativamente en comparación con la de un receptor óptimo de
-máxima verosimilitud~\cite{ref17}. A diferencia del SIC, el MPA no necesita que las señales tengan
+máxima verosimilitud~\cite{ref10}. A diferencia del SIC, el MPA no necesita que las señales tengan
 niveles de potencia diferentes, lo que lo hace más robusto cuando los dispositivos están a
-distancias parecidas del eNB~\cite{ref10}.
+distancias parecidas del eNB~\cite{ref9}.
 
 En este trabajo, SCMA se aplica al procedimiento de acceso aleatorio de NB-IoT para ampliar
 la capacidad de separación de dispositivos colisionados más allá de lo que permite la
@@ -290,7 +290,7 @@ diferencia de ToA o de potencia por sí sola. En el esquema CRACS-R
 (\cref{sec:cracs_r}), el eNB responde a cada preámbulo colisionado
 con dos RAR, cada uno con seis \textit{codebooks} disponibles, de manera que los dispositivos
 colisionados pueden elegir combinaciones distintas de RAR y \textit{codebook} para transmitir
-su MSG3~\cite{ref10}. El detector MPA en recepción procesa los MSG3 recibidos sobre los
+su MSG3~\cite{ref9}. El detector MPA en recepción procesa los MSG3 recibidos sobre los
 recursos compartidos e intenta recuperar cada mensaje por separado, avanzando en el proceso
 de acceso solo a los dispositivos cuya separación sea exitosa.
 
@@ -319,14 +319,14 @@ consecuencia, una falla en MSG3 que obliga a repetir todo el procedimiento.
 
 La detección de colisiones se basa en analizar el perfil de retardo de potencia (PDP,
 \textit{Power Delay Profile}), que se obtiene al correlacionar la señal recibida en el PRACH
-con la secuencia Zadoff-Chu generada en el eNB~\cite{ref20}. Cuando un solo
+con la secuencia Zadoff-Chu generada en el eNB~\cite{ref11}. Cuando un solo
 dispositivo transmite un preámbulo, el PDP muestra un solo pico de correlación. Cuando varios
 dispositivos transmiten el mismo preámbulo desde diferentes distancias, aparecen varios picos
 dentro de la misma zona de correlación cero (ZCZ, \textit{Zero Correlation Zone}), lo que
-indica que hubo una colisión~\cite{ref20}.
+indica que hubo una colisión~\cite{ref11}.
 
 Estudios recientes han mostrado que las técnicas de aprendizaje automático pueden mejorar
-mucho la precisión de esta detección. Maldonado Cardenas \textit{et al.}~\cite{ref20}
+mucho la precisión de esta detección. Maldonado Cardenas \textit{et al.}~\cite{ref11}
 proponen un método basado en redes neuronales que, entrenado con los 24 valores de potencia
 del PDP por compartimiento, alcanza una precisión balanceada (\textit{Balanced Accuracy})
 mayor al 98\,\% en escenarios con condiciones de canal homogéneas y del 95\,\% en
@@ -427,49 +427,49 @@ espacio, estas condiciones cambian por completo. Las redes no terrestres (NTN,
 \textit{Non-Terrestrial Networks}) ---que incluyen satélites de diferentes órbitas y
 plataformas de gran altitud--- se han vuelto un complemento necesario de las redes celulares
 para llevar conectividad a regiones donde la infraestructura terrestre no alcanza o no
-existe~\cite{ref3, ref13}. Entre las distintas órbitas posibles, los satélites de órbita
+existe~\cite{ref3, ref7}. Entre las distintas órbitas posibles, los satélites de órbita
 baja (LEO, \textit{Low Earth Orbit}) son la opción más prometedora para aplicaciones IoT de
 baja latencia, gracias a que están relativamente cerca de la superficie
-terrestre~\cite{ref3, ref6}.
+terrestre~\cite{ref3, ref8}.
 
 Los satélites LEO orbitan entre los 500 y 2000 km de altitud, lo que los diferencia de los
 satélites de órbita media (MEO, \textit{Medium Earth Orbit}) y de los geoestacionarios
 (GEO, \textit{Geostationary Earth Orbit}), que están a unos
-35\,786 km~\cite{ref6, ref18}. Esta menor altitud ofrece dos ventajas principales: una
+35\,786 km~\cite{ref8, ref12}. Esta menor altitud ofrece dos ventajas principales: una
 pérdida de trayectoria (\textit{path loss}) mucho menor que en GEO y un retardo de ida y
 vuelta (RTT, \textit{Round-Trip Time}) de entre 2 y 20 ms según la elevación, comparado con
-los aproximadamente 500 ms de la órbita geoestacionaria~\cite{ref6}. Sin embargo, la baja
+los aproximadamente 500 ms de la órbita geoestacionaria~\cite{ref8}. Sin embargo, la baja
 altitud también implica una velocidad orbital alta ---alrededor de 7{,}5 km/s---, lo que
 significa que cada satélite es visible desde un punto fijo en tierra durante solo cinco a
-quince minutos, dependiendo de la altitud y la elevación mínima~\cite{ref18}. Esto tiene
+quince minutos, dependiendo de la altitud y la elevación mínima~\cite{ref12}. Esto tiene
 una consecuencia directa sobre el acceso: todos los dispositivos dentro del haz del satélite
 que necesiten conectarse deben hacerlo en esa breve ventana de visibilidad, lo que genera
 ráfagas de intentos de acceso simultáneo que agravan el problema de colisiones comparado
-con las redes terrestres~\cite{ref13}.
+con las redes terrestres~\cite{ref7}.
 
 Además, el movimiento del satélite introduce efectos en el canal que no existen en los
 sistemas terrestres fijos. El más importante es el desplazamiento Doppler: el movimiento
 relativo entre el satélite y los dispositivos en tierra produce un cambio en la frecuencia
 portadora recibida que, en la banda Ku, puede superar los 200 kHz en el peor
-caso~\cite{ref6}. Este desplazamiento afecta la ortogonalidad entre subportadoras en sistemas
+caso~\cite{ref8}. Este desplazamiento afecta la ortogonalidad entre subportadoras en sistemas
 OFDM y dificulta la detección de preámbulos en NPRACH si no se compensa adecuadamente.
 Aunque se pueden usar técnicas basadas en sistemas globales de navegación por satélite (GNSS,
 \textit{Global Navigation Satellite System}) para estimar y precompensar parcialmente el
-Doppler, los desfases que quedan ---causados por multitrayecto y errores en la estimación---
-pueden llegar a varios kilohertz y deben manejarse en el receptor~\cite{ref6}. También se debe
+Doppler, los desfases que quedan causados por multitrayecto y errores en la estimación
+pueden llegar a varios kilohertz y deben manejarse en el receptor~\cite{ref8}. También se debe
 considerar que el retardo de propagación cambia continuamente a medida que el satélite
 se mueve, lo cual afecta directamente el cálculo del avance de temporización en NB-IoT, un
 parámetro crítico para sincronizar el enlace ascendente. El canal satelital presenta además
 un componente dominante de línea de vista (LOS, \textit{Line of Sight}) en la mayoría de los
 casos, que se modela con distribuciones de Rician, aunque en zonas suburbanas o con
 obstáculos puede haber condiciones de no visibilidad directa (NLOS, \textit{Non-Line of
-Sight})~\cite{ref13}.
+Sight})~\cite{ref7}.
 
 Ante estos desafíos, 3GPP ha incorporado soporte para NTN en sus especificaciones desde la
 Release 16, con una integración más completa en la Release 17, donde se formaliza la
 arquitectura de acceso radio no terrestre tanto para NR (\textit{New Radio}) como para
-NB-IoT~\cite{ref13}. La Release 18 identifica la congestión en el acceso como un problema
-abierto en escenarios NTN-IoT y plantea soluciones para versiones futuras~\cite{ref13}. Esta
+NB-IoT~\cite{ref7}. La Release 18 identifica la congestión en el acceso como un problema
+abierto en escenarios NTN-IoT y plantea soluciones para versiones futuras~\cite{ref7}. Esta
 evolución en las normas muestra que simplemente extender los procedimientos terrestres al
 entorno satelital no es suficiente: las condiciones cambiantes del canal LEO, la variación
 del retardo y las ráfagas de acceso hacen necesario adaptar los mecanismos de acceso
@@ -477,7 +477,7 @@ aleatorio a este entorno.
 
 Es en este contexto donde se sitúa el presente trabajo. La combinación de NB-IoT con enlaces
 satelitales LEO es un escenario relevante pero todavía poco estudiado desde el punto de vista
-de la capacidad del canal de acceso no ortogonal~\cite{ref4, ref6, ref13}. El comportamiento
+de la capacidad del canal de acceso no ortogonal~\cite{ref5, ref8, ref7}. El comportamiento
 de esquemas como NORA y SCMA bajo las condiciones de un enlace LEO ---retardo variable,
 Doppler residual, canal Rician--- no se puede deducir directamente de los resultados
 obtenidos en redes terrestres, lo que justifica el estudio por simulación que se plantea en
@@ -491,12 +491,12 @@ permiten medir la capacidad del canal de acceso en este escenario.
 
 El concepto de capacidad en el acceso aleatorio es diferente de la definición clásica de
 Shannon, que establece la tasa máxima a la que se puede transmitir información con una
-probabilidad de error muy pequeña sobre un canal dado~\cite{ref16}. Mientras que la capacidad
+probabilidad de error muy pequeña sobre un canal dado~\cite{ref17}. Mientras que la capacidad
 de Shannon se refiere al límite teórico del enlace físico entre un transmisor y un receptor,
 la capacidad del canal de acceso aleatorio es la medida que mejor se ajusta a este tipo de
 escenarios: indica la cantidad máxima de dispositivos que pueden completar el procedimiento
 de acceso de forma simultánea, con los recursos disponibles y bajo las condiciones de
-operación del sistema~\cite{ref4, ref5, ref10}. Es la métrica adecuada porque en escenarios
+operación del sistema~\cite{ref5, ref6, ref9}. Es la métrica adecuada porque en escenarios
 MTC el cuello de botella generalmente no es la tasa del enlace físico sino la eficiencia del
 mecanismo de acceso cuando muchos dispositivos compiten por los mismos recursos.
 
@@ -504,7 +504,7 @@ La capacidad del canal de acceso se evalúa usando varias métricas que miden di
 aspectos del desempeño del sistema. La probabilidad de éxito de acceso ($P_s$)
 indica la fracción de dispositivos que logran completar la conexión en un intento dado, sin
 necesitar retransmisión; su complemento, la probabilidad de fallo, depende de las colisiones
-de preámbulo y las fallas al decodificar MSG3~\cite{ref4, ref10}. El
+de preámbulo y las fallas al decodificar MSG3~\cite{ref5, ref9}. El
 \textit{throughput} de acceso aleatorio ($T$) es el número de intentos de acceso
 exitosos por unidad de tiempo o por ranura de acceso, y es la métrica que mejor refleja qué
 tan bien se aprovecha el canal; en el acceso ortogonal clásico tipo ALOHA ranurado (S-ALOHA,
@@ -513,29 +513,29 @@ paquetes por ranura, un límite que los esquemas NORA y SCMA buscan superar~\cit
 retardo de acceso ($D$) mide el tiempo que pasa desde que un dispositivo inicia el
 procedimiento de acceso hasta que lo completa, incluyendo todos los reintentos; en NB-IoT,
 este retardo puede ser considerable incluso sin colisiones debido a las periodicidades del
-NPRACH, y se vuelve especialmente crítico en los niveles CE1 y CE2~\cite{ref7}. Por último, la
+NPRACH, y se vuelve especialmente crítico en los niveles CE1 y CE2~\cite{ref4}. Por último, la
 eficiencia de acceso relaciona el número de dispositivos aceptados con el total de
 recursos consumidos por el procedimiento, tomando en cuenta tanto el canal de preámbulo como
 el canal de datos ascendente.
 
 Para este trabajo, la métrica principal es la cantidad de usuarios aceptados de forma
 simultánea, es decir, el número máximo de dispositivos que pueden completar el procedimiento de acceso
-en una ventana de tiempo dada sin que el sistema se sature~\cite{ref4}. Esta cantidad depende
+en una ventana de tiempo dada sin que el sistema se sature~\cite{ref5}. Esta cantidad depende
 de tres factores relacionados entre sí: la densidad de dispositivos activos, qué tan bien el
 esquema de acceso resuelve las colisiones, y las condiciones del canal. En el entorno LEO,
 el tercer factor cobra mayor importancia: el retardo variable, el Doppler residual y las
 ráfagas de acceso que se producen durante la ventana de visibilidad del satélite cambian la
 distribución de los intentos de acceso en el tiempo y afectan la probabilidad de decodificar
 MSG3 correctamente, lo que reduce la capacidad efectiva respecto a lo que predicen los
-modelos terrestres~\cite{ref6, ref13}.
+modelos terrestres~\cite{ref8, ref7}.
 
 La relación entre la densidad de dispositivos y la capacidad del canal se puede ver en la
 curva de throughput del sistema. A medida que el número de dispositivos activos $M$
 crece, el throughput aumenta al principio porque hay más transmisiones útiles, pero
 a partir de cierto punto las colisiones empiezan a dominar y el throughput comienza
-a bajar, hasta que el sistema colapsa por congestión~\cite{ref5}. El punto de máximo
+a bajar, hasta que el sistema colapsa por congestión~\cite{ref6}. El punto de máximo
 throughput define la carga óptima de operación y, junto con la probabilidad de éxito
 de acceso bajo esa carga, marca la capacidad operativa del canal. Un esquema como NORA, que
 recupera dispositivos colisionados en vez de descartarlos, mueve este punto de máximo hacia
 cargas mayores, aumentando la capacidad del canal sin necesitar recursos
-adicionales~\cite{ref4, ref5}.
+adicionales~\cite{ref5, ref6}.
