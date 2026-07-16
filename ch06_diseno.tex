@@ -98,12 +98,12 @@ RNF-06 & El sistema debe generar resultados estadísticamente consistentes y rep
 El diseño se acota por las siguientes restricciones, derivadas de la especificación NB-IoT y de la viabilidad del MPA:
 
 \begin{itemize}[leftmargin=*, noitemsep]
-  \item \textbf{Ancho de banda uplink.} Una sola subportadora de 15~kHz (NB-IoT NTN no permite multitono en uplink en la banda de interés).
+  \item \textbf{Ancho de banda uplink.} Cada transmisión NPUSCH ocupa una única subportadora de 15~kHz (\textit{single-tone}, $N_{\text{scRU}}=1$; NB-IoT NTN no permite multitono en la banda de interés). El canal NB-IoT dispone de 12 subportadoras físicas de 15~kHz (180~kHz totales); el planificador asigna UEs mediante FDMA entre ellas (esquema Legacy) o replica el esquema T-SCMA de forma independiente sobre cada una (esquemas CRACS-R/CRACS-T), lo que multiplica la capacidad efectiva del sistema por 12 respecto a un análisis restringido a una sola subportadora.
   \item \textbf{Longitud de la ventana T-SCMA.} Máximo $N = 4$ subframes por ventana, alineado con la estructura de dos slots de NPUSCH Format~1.
   \item \textbf{Número de codebooks SCMA.} Máximo $K_{\text{CB}} = 6$, con sobreocupación $K_{\text{CB}}/N = 150\%$, límite práctico de separabilidad del MPA.
   \item \textbf{Ángulo de elevación mínimo.} $\alpha_{\min}$ configurable en el rango $10^\circ$--$45^\circ$, con el compromiso entre cobertura angular y pérdida de enlace.
   \item \textbf{Distancia diferencial mínima.} $\Delta d_{\min} = 150$~m, correspondiente a la resolución temporal del NPRACH a 15~kHz de subportadora.
-  \item \textbf{Número de pilotos DMRS ortogonales.} 3 por capa SCMA, máximo teórico de cyclic shifts ortogonales compatibles con $N = 4$ recursos.
+  \item \textbf{Número de pilotos DMRS ortogonales.} $D=3$ secuencias de referencia específicas por UE, seleccionadas del conjunto de 16 secuencias base $w(n)$ que define 3GPP TS~36.211~\cite{ref39} (§10.1.4.1.1, Tabla 10.1.4.1.1-1) para NPUSCH \textit{single-tone}. Dos UEs de una misma capa SCMA comparten $d_v \times 2 = 4$ símbolos DMRS dentro de la ventana T-SCMA, lo que acota en 4 el número máximo de secuencias mutuamente ortogonales disponibles sobre esa ventana compartida; el conjunto estándar de 16 secuencias alcanza dicha cota. $D=3$ se adopta como valor de diseño conservador dentro de ese límite. Dado que el DMRS \textit{single-tone} estándar es específico de celda, su reutilización como identificador por UE constituye una extensión no estándar de este trabajo, que completa la etapa de estimación de canal no especificada en el esquema T-SCMA base \cite{ref38}.
   \item \textbf{Preámbulos disponibles.} $N_{\text{pream}} = 48$, conforme a la especificación NB-IoT para RACH.
 \end{itemize}
 
@@ -135,7 +135,7 @@ Altitud orbital & $h_{\text{sat}}$ & 600 km & 3GPP TR 36.763 \\
 Velocidad orbital & $v_{\text{sat}}$ & $\sim$7.5 km/s & Mecánica orbital LEO \\
 Ángulo de elevación mínimo & $\alpha_{\min}$ & $10^\circ$--$45^\circ$ (default $40^\circ$) & Configurable \\
 RTT mínimo (nadir) & $\mathrm{RTT}_{\min}$ & $\sim$4 ms & Cálculo \\
-RTT máximo (borde de cobertura) & $\mathrm{RTT}_{\max}$ & $\sim$27 ms & $\alpha_{\min}=10^\circ$ \\
+RTT máximo (borde de cobertura) & $\mathrm{RTT}_{\max}$ & $\sim$13 ms & $\alpha_{\min}=10^\circ$ \\
 Pérdida atmosférica & $L_{\text{atm}}$ & $0{,}53$ dB (constante) & Modelo de referencia \\
 FSPL promedio & $L_{\text{FSPL}}$ & $150$ dB (constante) & Modelo de referencia \\
 Margen de enlace & $L_{\text{margin}}$ & $0{,}82$ dB (constante) & Reserva de diseño \\
@@ -504,6 +504,8 @@ El funcionamiento de T-SCMA puede resumirse en cinco pasos:
 \end{enumerate}
 
 Esta estructura de transmisión es común para los dos esquemas propuestos y permite multiplexar varios UEs sobre una única subportadora de NB-IoT. La diferencia es que CRACS-R utiliza una asignación aleatoria de \textit{codebooks}, mientras que CRACS-T aprovecha el agrupamiento previo para distribuirlos entre los diferentes clústeres y reducir la contienda durante MSG3.
+
+\paragraph{Base física de la separación intra-\textit{codebook}.} Cuando dos o más UEs seleccionan el mismo \textit{codebook} en un mismo subframe, la separación no la proporciona el piloto DMRS por sí solo: su función es estimar el canal e identificar a los usuarios activos, no separar los datos. Lo que permite decodificar transmisiones que comparten \textit{codebook} es la diferencia entre los canales que atraviesa cada una, diferencia que el DMRS estima. Zhang \textit{et al.}~\cite{ref40} reportan que dos transmisiones sobre un mismo \textit{codebook} con secuencias piloto distintas pueden decodificarse conjuntamente mediante MPA con una pérdida inferior a $0{,}5$~dB, precisamente porque cada \textit{codebook} atraviesa un canal inalámbrico distinto. El uso del DMRS para la detección ciega de usuarios activos en acceso \textit{grant-free} SCMA sigue el enfoque de Bayesteh \textit{et al.}~\cite{ref42}, y la elección de $K_{\text{CB}}=6$ \textit{codebooks} con $D=3$ pilotos por \textit{codebook} coincide con la adoptada de forma independiente en~\cite{ref41}. No obstante, la robustez reportada en esta línea de trabajo se apoya en la diversidad espacial de múltiples antenas de recepción~\cite{ref43}, no disponible en el escenario NTN--LEO de este trabajo, que asume un único enlace por UE y un canal constante sin desvanecimiento ni Doppler. Por esta razón, la separación intra-\textit{codebook} no se simula a nivel de forma de onda, sino que se representa a nivel de sistema mediante el modelo probabilístico de decodificación descrito en el \cref{ch:implementacion}.
 
 \section{Plan de evaluación}
 \label{sec:metodologia}
