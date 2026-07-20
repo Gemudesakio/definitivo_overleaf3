@@ -6,7 +6,7 @@
 
 La implementación del diseño formalizado en el Capítulo 3 requería una plataforma capaz de simular el funcionamiento de los protocolos NB-IoT, en particular de las capas MAC y RRC involucradas en el procedimiento de acceso aleatorio, así como incorporar componentes propios para el escenario LEO no terrestre. Con este propósito, se evaluaron tres plataformas de simulación ampliamente utilizadas en investigación: ns-3, OMNeT++/INET y 5G-LENA-NTN. La comparación se realizó considerando el soporte de NB-IoT, la capacidad para representar enlaces satelitales, la facilidad para modificar el procedimiento de acceso aleatorio y el costo computacional. 
 
-La \cref{tab:impl_herramientas} resume la comparación.
+La \cref{tab:impl_herramientas} resume la comparación entre las plataformas evaluadas, a partir de la cual se selecciona ns-3 como entorno de simulación para este trabajo. Aunque 5G-LENA-NTN incorpora modelos más recientes para redes NTN, está orientado a NR y no implementa NB-IoT. Por su parte, OMNeT++ ofrece una arquitectura flexible, pero requiere desarrollar gran parte del procedimiento de acceso aleatorio. En cambio, ns-3 dispone de una base madura para LTE/NB-IoT y permite concentrar el desarrollo en los mecanismos propuestos sin modificar las capas superiores del simulador.
 
 \begin{table}[H]
 \centering
@@ -34,8 +34,6 @@ Documentación y comunidad & Extensa, con publicaciones y módulos contribuidos.
 \end{tabular}
 \end{table}
 
-De las alternativas evaluadas, ns-3 fue la opción más adecuada. Aunque 5G-LENA-NTN incorpora modelos más recientes para redes NTN, está orientado a NR y no implementa NB-IoT. Por su parte, OMNeT++ ofrece una arquitectura flexible, pero requiere desarrollar gran parte del procedimiento de acceso aleatorio. En cambio, ns-3 dispone de una base madura para LTE/NB-IoT y permitió concentrar el desarrollo en los mecanismos propuestos sin modificar las capas superiores del simulador.
-
 \section{Consideraciones de implementación}
 \label{sec:impl_limitaciones}
 
@@ -58,23 +56,23 @@ La implementación reutiliza la mayor cantidad posible de funcionalidades existe
 \label{tab:impl_componentes}
 \scriptsize
 \renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.5cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.0cm}@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.5cm} Y >{\raggedright\arraybackslash}p{2.0cm}@{}}
 \toprule
 \textbf{Bloque del diseño} & \textbf{Componente implementado} & \textbf{Origen} \\
 \midrule
 Modelo orbital y geometría LEO (\cref{sec:modelo_sistema}) & Modelo orbital LEO, modelo de propagación LEO y modelo de retardo de propagación constante, disponibles de fábrica en ns-3. & Reutilizado \\
-Movilidad estacionaria de UEs (\cref{sec:modelo_sistema}) & Modelo de posición constante con asignación uniforme en disco, disponibles de fábrica. & Reutilizado \\
+Movilidad estacionaria de UEs (\cref{sec:modelo_sistema}) & Modelo de posición constante con asignación uniforme en disco, disponible de fábrica. & Reutilizado \\
 \midrule
-Generación de tráfico (\cref{sec:modelo_sistema}) & Generador de arribos extendido para soportar los dos modelos de tráfico mMTC (\cref{sec:impl_trafico}). & Extendido \\
-Procedimiento Legacy (\cref{sec:legacy}) & Rama base del MAC NB-IoT, adaptada en el manejo de colisiones para reflejar el costo real del recurso en el aire (ver discusión al final de esta sección). & Extendido \\
+Generación de tráfico (\cref{sec:modelo_sistema}) & Generador de arribos extendido para soportar los dos modelos de tráfico mMTC. & Extendido \\
+Procedimiento Legacy (\cref{sec:legacy}) & Rama base del MAC NB-IoT, adaptada en el manejo de colisiones para reflejar el costo real del recurso en el aire. & Extendido \\
 \midrule
-Detector probabilístico (\cref{sec:cracs_r,sec:cracs_t}) & Sub-rutina del MAC del eNB que invoca el detector y propaga la decisión al flujo de RAR (\cref{alg:detector}). & Nuevo \\
+Detector probabilístico (\cref{sec:cracs_r,sec:cracs_t}) & Subrutina del MAC del eNB que invoca el detector y propaga la decisión al flujo de RAR (\cref{alg:detector}). & Nuevo \\
 Esquema CRACS-R (\cref{sec:cracs_r}) & Rama de procedimiento con dos RAR fijas y resolución MSG3 propia. & Nuevo \\
 Esquema CRACS-T (\cref{sec:cracs_t}) & Rama de procedimiento con \emph{clustering} ToA previo, una RAR por clúster y resolución MSG3 propia. & Nuevo \\
 \emph{Clustering} ToA (\cref{sec:toa}) & Algoritmo de barrido ordenado sobre distancias diferenciales (\cref{alg:clustering}). & Nuevo \\
-Lógica de decisión MSG3 (\cref{sec:resolucion}) & Clasificador de transmisiones por densidad efectiva en el factor graph (\cref{alg:decision}). & Nuevo \\
+Lógica de decisión MSG3 (\cref{sec:resolucion}) & Clasificador de transmisiones por densidad efectiva en el \emph{factor graph} (\cref{alg:decision}). & Nuevo \\
 Decodificador SCMA / MPA (\cref{sec:scma}) & Modelo abstracto a nivel de sistema basado en probabilidad tabulada (\cref{alg:mpa}). & Nuevo \\
-Modelado SCMA (asignación de codebook) & Determinista por clúster ToA en CRACS-T; sorteo aleatorio del catálogo en CRACS-R; ambos sobre la misma matriz factorial $\mathbf{F}_{4\times 6}$ y $K_{\text{CB}}=6$ capas. & Nuevo \\
+Modelado SCMA (asignación de \emph{codebook}) & Determinista por clúster ToA en CRACS-T; sorteo aleatorio del catálogo en CRACS-R; ambos sobre la misma matriz factorial $\mathbf{F}_{4\times6}$ y $K_{\text{CB}}=6$ capas. & Nuevo \\
 \emph{Helper} de temporización NTN & Estimación del RTT esperado por UE para alimentar la lógica de \emph{timing advance}. & Nuevo \\
 Sistema de reportería interno & Módulo común a los tres esquemas que centraliza los eventos y los KPIs de cada simulación. & Nuevo \\
 \bottomrule
@@ -111,7 +109,7 @@ Pool de preámbulos NPRACH & Tamaño barrido en el espacio lógico de 3,75~kHz, 
 Separación mínima entre clústeres $\Delta d_{\min}$ & Resolución temporal efectiva del NPRACH. & 150~m \\
 Parámetros CRACS-R & Tamaño máximo de grupo SCMA y tamaño del catálogo de pilotos DMRS. & 2, 3 \\
 Temporizadores RRC T300 y de \emph{Connection Request} & Temporizador T300 del UE y \emph{timeout} del eNB. Valor estándar 5\,000~ms según 3GPP TS~36.331; E7\_t300 lo barre en $\{5\,000,\;10\,000,\;40\,000\}$~ms. & 5\,000 / 5\,000 \\
-Tiempo simulado total & Duración de cada corrida. & 120\,000~ms \\
+Tiempo simulado total & Duración de cada simulación. & 120\,000~ms \\
 \bottomrule
 \end{tabularx}
 \end{table}
