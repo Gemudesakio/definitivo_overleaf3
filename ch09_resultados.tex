@@ -1,86 +1,78 @@
 \chapter{Resultados y Análisis}
 \label{ch:resultados}
 
-Este capítulo presenta y discute los hallazgos empíricos de la evaluación de los dos esquemas propuestos en el \cref{ch:diseno} (CRACS-R y CRACS-T) frente al baseline Legacy del estándar NB-IoT \cite{ref18}. La campaña experimental siguió el plan metodológico descrito en la \cref{sec:metodologia}, implementado sobre el simulador descrito en el \cref{ch:implementacion}, y consistió en $4\,260$ corridas independientes: $3\,990$ de la campaña principal sobre los nueve escenarios E0--E6\_burst, y $270$ del escenario adicional E7\_t300 que caracterizó la sensibilidad al temporizador $T_{300}$.
+Este capítulo presenta y discute los hallazgos empíricos de la evaluación de los dos esquemas propuestos en el \cref{ch:diseno} (CRACS-R y CRACS-T) frente al baseline Legacy del estándar NB-IoT \cite{ref18}. La campaña experimental siguió el plan metodológico descrito en la \cref{sec:metodologia}, implementado sobre el simulador descrito en el \cref{ch:implementacion}, y consistió en $4\,260$ simulaciones independientes: $3\,990$ de la campaña principal sobre los nueve escenarios E0--E6\_burst, y $270$ del escenario adicional E7\_t300 que caracterizó la sensibilidad al temporizador $T_{300}$.
 
 Los resultados se contrastan a lo largo del capítulo con la hipótesis \emph{ex-ante} de inclusión estricta formulada en el \cref{ch:diseno},
 \[
 \Omega_{\text{Legacy}} \subsetneq \Omega_{\text{CRACS-R}} \subsetneq \Omega_{\text{CRACS-T}},
 \]
-y con los cinco criterios cuantitativos de aceptación C1--C5 (\cref{sec:design_criterios}). Como se mostrará, la conjetura ex-ante se cumple en $38$ de los $42$ puntos operativos evaluados (criterio: $\mathrm{SAR}_{\text{Legacy}} \leq \mathrm{SAR}_{\text{CRACS-R}} \leq \mathrm{SAR}_{\text{CRACS-T}}$ aplicado sobre la media muestral de SAR en cada combinación de escenario y valor barrido), pero \emph{deja de cumplirse en una región importante en la práctica}: para que CRACS-T supere a CRACS-R hace falta $T_{300} \geq 10$~s; con el valor por defecto del estándar ($T_{300}=5$~s, recomendado por 3GPP TS~36.331), CRACS-R supera a CRACS-T en $\mathrm{SAR}$ a $K{=}300$ ráfaga. Esta dependencia solo apareció en los datos y se trata como un requisito de despliegue de CRACS-T en \cref{sec:res_sintesis} y como una limitación en \cref{sec:res_limitaciones}.
-
-La organización es la siguiente. La \cref{sec:res_config} resume la configuración experimental y el método estadístico. La \cref{sec:res_e0} valida la coherencia del simulador con el escenario de un solo UE. Las \cref{sec:res_e1,sec:res_e4,sec:res_e5,sec:res_e6} reportan los escenarios de carga, calibración, robustez al pool NPRACH y saturación, respectivamente. La \cref{sec:res_e7} expone el hallazgo central sobre $T_{300}$, incluida una prueba de control que confirma que el efecto se debe al temporizador. La \cref{sec:res_criterios} contrasta los resultados con los criterios C1--C5. Finalmente, las \cref{sec:res_sintesis,sec:res_limitaciones,sec:res_cierre} discuten implicaciones, limitaciones y cierre.
+y con los cinco criterios cuantitativos de aceptación C1--C5 (\cref{sec:res_criterios}). Como se mostrará, la conjetura ex-ante se cumple en $38$ de los $42$ puntos operativos evaluados (criterio: $\mathrm{SAR}_{\text{Legacy}} \leq \mathrm{SAR}_{\text{CRACS-R}} \leq \mathrm{SAR}_{\text{CRACS-T}}$ aplicado sobre la media muestral de SAR en cada combinación de escenario y valor barrido), pero deja de cumplirse en una región importante en la práctica: para que CRACS-T supere a CRACS-R hace falta $T_{300} \geq 10$~s; con el valor por defecto del estándar ($T_{300}=5$~s, recomendado por 3GPP TS~36.331), CRACS-R supera a CRACS-T en $\mathrm{SAR}$ a $K{=}300$ ráfaga. Esta dependencia solo apareció en los datos y se trata como un requisito de despliegue de CRACS-T en \cref{sec:res_sintesis} y como una limitación en \cref{sec:res_limitaciones}.
 
 \section{Configuración experimental y método estadístico}
 \label{sec:res_config}
 
-La \cref{tab:res_config} sintetiza los diez escenarios ejecutados, ya descritos en detalle en los \cref{sec:metodologia,ch:implementacion}. Las cinco subsecciones siguientes formalizan las elecciones metodológicas que sustentan los resultados reportados a lo largo del capítulo.
+La \cref{tab:res_config} resume el número de simulaciones ejecutadas por escenario (la \cref{tab:escenarios} detalla la variable barrida, el rango y los esquemas evaluados en cada uno). Las cinco subsecciones siguientes formalizan las elecciones metodológicas que sustentan los resultados reportados a lo largo del capítulo.
 
 \begin{table}[!t]
 \centering
-\caption{Síntesis de escenarios ejecutados.}
+\caption{Número de simulaciones ejecutadas por escenario.}
 \label{tab:res_config}
 \small
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{@{}l l l l c@{}}
+\begin{tabular}{@{}l c@{}}
 \toprule
-\textbf{Esc.} & \textbf{Variable barrida} & \textbf{Rango} & \textbf{Esquemas} & \textbf{Corridas} \\
+\textbf{Esc.} & \textbf{Simulaciones} \\
 \midrule
-E0          & $K$            & 1               & 3 & 90  \\
-E1          & $K$ (avg)      & 1--100 (11 pts) & 3 & 990 \\
-E1\_high    & $K$ (high)     & 1--100 (11 pts) & 3 & 990 \\
-E4          & $\Delta d_{\min}$ (avg)  & 50--1000 m (8 pts) & CRACS-T & 240 \\
-E4\_high    & $\Delta d_{\min}$ (high) & 50--1000 m (8 pts) & CRACS-T & 240 \\
-E5          & $N_{\text{pream}}$ (avg) & 12--48 (4 pts) & 3 & 360 \\
-E5\_high    & $N_{\text{pream}}$ (high)& 12--48 (4 pts) & 3 & 360 \\
-E6\_uniform & $K$ (Poisson TM1) & 30--1000 (4 pts) & 3 & 360 \\
-E6\_burst   & $K$ (Beta TM2)    & 30--1000 (4 pts) & 3 & 360 \\
-E7\_t300    & $T_{300}$ (en E6\_burst $K{=}300$) & 5, 10, 40 s & 3 & 270 \\
+E0          & 90  \\
+E1          & 990 \\
+E1\_high    & 990 \\
+E4          & 240 \\
+E4\_high    & 240 \\
+E5          & 360 \\
+E5\_high    & 360 \\
+E6\_uniform & 360 \\
+E6\_burst   & 360 \\
+E7\_t300    & 270 \\
 \midrule
-\multicolumn{4}{r}{\textbf{Total}} & $4\,260$ \\
+\multicolumn{1}{r}{\textbf{Total}} & $4\,260$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-El valor de referencia del timer fue $T_{300}=5$~s, valor recomendado por el estándar NB-IoT \cite{ref18}, que pertenece al subconjunto $\{2{,}5,\, 4,\, 5,\, 6,\, 8,\, 10,\, 15,\, 25,\, 40,\, 60\}$~s admitido por el estándar. La duración simulada por corrida fue $T_{\text{sim}}=120$~s (180~s en E1, E1\_high, E4\_high y E5\_high) sobre un único satélite LEO a $h_{\text{sat}}=600$~km con $\alpha_{\min}=40^\circ$ y los demás parámetros listados en la \cref{tab:impl_flags}.
+El valor de referencia (por defecto) del timer fue $T_{300}=5$~s (\cref{tab:impl_flags}); el estándar NB-IoT \cite{ref18} admite además los valores $2{,}5$ / $4$ / $6$ / $8$ / $10$ / $15$ / $25$ / $40$ / $60$~s. La duración simulada por simulación fue $T_{\text{sim}}=120$~s (180~s en E1, E1\_high, E4\_high y E5\_high) sobre un único satélite LEO a $h_{\text{sat}}=600$~km con $\alpha_{\min}=40^\circ$ y los demás parámetros listados en la \cref{tab:impl_flags}.
 
 \subsection{Tamaño de muestra y régimen de simulación}
 \label{sec:res_config_n}
 
-La literatura de comunicaciones inalámbricas distingue dos regímenes de \emph{simulación de Monte Carlo}: (i) el régimen \emph{analítico}, en el que cada muestra es un sorteo aleatorio rápido de un modelo cerrado (típicamente $10^{4}$--$10^{6}$ muestras por punto, costo $\sim$\,$\mu$s); y (ii) el régimen \emph{system-level}, en el que cada muestra es una corrida completa del simulador que reproduce el procedimiento de acceso aleatorio, las retransmisiones, los temporizadores y el modelo PHY (típicamente $20$--$50$ semillas por punto, costo $\sim$\,segundos a minutos) \cite{ref22,ref23}. Las $4\,260$ corridas de este trabajo pertenecen al segundo régimen: cada corrida ejecutó $120$--$180$~s de tiempo simulado sobre ns-3.32 con $K$ hasta $1\,000$ UEs activos, con un tiempo de cómputo del orden de segundos a decenas de segundos por corrida. Bajo este costo, $n=30$ semillas por punto satisface la convergencia empírica de la media (\cref{fig:res_convergence}) y se ubica dentro del rango habitual de los estudios system-level de NB-IoT y NORA \cite{ref4,ref24}; un objetivo de $n=10^{4}$ por punto correspondería al régimen analítico y requeriría reformular el experimento.
+La literatura de comunicaciones inalámbricas distingue dos regímenes de simulación de Monte Carlo: (i) el régimen analítico, en el que cada muestra es un sorteo aleatorio rápido de un modelo cerrado (típicamente $10^{4}$--$10^{6}$ muestras por punto, costo $\sim$\,$\mu$s); y (ii) el régimen \emph{system-level}, en el que cada muestra es una simulación completa del simulador que reproduce el procedimiento de acceso aleatorio, las retransmisiones, los temporizadores y el modelo PHY (típicamente $20$--$50$ semillas por punto, costo $\sim 10^{0}$--$10^{2}$~s) \cite{ref22,ref23}. Las $4\,260$ simulaciones de este trabajo pertenecen al segundo régimen: cada simulación ejecutó $120$--$180$~s de tiempo simulado sobre ns-3.32 con $K$ hasta $1\,000$ UEs activos, con un tiempo de cómputo del orden de segundos a decenas de segundos por simulación. Bajo este costo, $n=30$ semillas por punto satisface la convergencia empírica de la media (\cref{fig:res_convergence}) y se ubica dentro del rango habitual de los estudios system-level de NB-IoT y NORA \cite{ref4,ref24}; un objetivo de $n=10^{4}$ por punto correspondería al régimen analítico y requeriría reformular el experimento.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{fig912_convergence.pdf}
-\caption{Convergencia de la media de SAR como función del número acumulado de semillas para dos casos representativos seleccionados por tener varianza inter-semilla no nula: (a) Legacy bajo régimen E1 $K{=}100$ (perfil avg, $\bar{x}=0{,}903$, $s=0{,}076$) y (b) CRACS-R bajo régimen E6\_burst $K{=}300$ (perfil ráfaga, $\bar{x}=0{,}783$, $s=0{,}096$). La banda sombreada indica el IC al $95\%$ acumulado y la línea punteada gris la asíntota de la media. Ambos casos estabilizan dentro del $2\%$ de su valor final antes de la semilla $20$, lo que justifica $n=30$ como tamaño de muestra suficiente. Los casos con SAR saturada a $1{,}000$ (e.g.\ CRACS-T en E1\_high $K{=}100$) producen $s=0$ y curva plana sin banda IC, por lo que no aportan información sobre la convergencia.}
+\caption{Convergencia de la media de SAR con el número acumulado de semillas: (a) Legacy bajo E1 $K{=}100$ (perfil avg) y (b) CRACS-R bajo E6\_burst $K{=}300$ (perfil ráfaga). Banda sombreada: IC al $95\%$ acumulado; línea punteada: asíntota de la media.}
 \label{fig:res_convergence}
 \end{figure}
 
-La curva de convergencia muestra que el ancho del IC se reduce a aproximadamente $1/\sqrt{n}$ y que, en el régimen estacionario, la media muestral acumulada cruza dentro del $2\%$ de su valor asintótico antes de la semilla $20$. Las $10$ semillas restantes refuerzan la estabilidad sin alterar las conclusiones cualitativas. Aumentar $n$ a $100$ reduciría el ancho del IC en un factor de aproximadamente $1{,}8\times$ a costa de triplicar el tiempo de cómputo, sin modificar las conclusiones reportadas.
+Ambos casos se seleccionaron por presentar varianza inter-semilla no nula (Legacy: $\bar{x}=0{,}903$, $s=0{,}076$; CRACS-R: $\bar{x}=0{,}783$, $s=0{,}096$) y estabilizan dentro del $2\%$ de su valor final antes de la semilla $20$, lo que justifica $n=30$ como tamaño de muestra suficiente. Los casos con SAR saturada en su valor máximo ($\mathrm{SAR}=1$, no mil; e.g.\ CRACS-T en E1\_high $K{=}100$) producen $s=0$ y una curva plana sin banda de IC, por lo que no aportan información sobre la convergencia. La curva de convergencia muestra además que el ancho del IC se reduce a aproximadamente $1/\sqrt{n}$ y que, en el régimen estacionario, la media muestral acumulada cruza dentro del $2\%$ de su valor asintótico antes de la semilla $20$. Las $10$ semillas restantes refuerzan la estabilidad sin alterar las conclusiones cualitativas. Aumentar $n$ a $100$ reduciría el ancho del IC en un factor de aproximadamente $1{,}8\times$ a costa de triplicar el tiempo de cómputo, sin modificar las conclusiones reportadas.
 
-\subsection{Intervalos de confianza al 95\,\%}
-\label{sec:res_config_ci}
+\subsection{Metodología estadística}
+\label{sec:res_config_stats}
 
 Para cada celda (escenario, esquema, valor barrido) se reporta la media muestral acompañada de su IC al $95\%$ calculado con la distribución $t$-Student y $\nu = 29$ grados de libertad \cite{ref35},
 \[
 \mathrm{IC}_{95\%}(\bar{x}) = \bar{x} \pm t_{0{,}025,\,29}\,\frac{s}{\sqrt{n}},
 \]
-donde $s$ es la desviación estándar muestral. La aproximación es válida en virtud del Teorema del Límite Central, que aplica a la media de las $n=30$ muestras independientes incluso cuando la distribución subyacente del KPI no es gaussiana. La \cref{sec:res_config_outliers} reporta además un IC bootstrap percentile como verificación independiente.
+donde $s$ es la desviación estándar muestral. La aproximación es válida en virtud del Teorema del Límite Central, que aplica a la media de las $n=30$ muestras independientes incluso cuando la distribución subyacente del KPI no es gaussiana. En la \cref{sec:res_config_outliers} se reporta además un IC bootstrap percentile como verificación independiente.
 
-\subsection{Estadísticos robustos a outliers}
-\label{sec:res_config_robust}
+Las métricas de latencia ($T_{\text{access}}$, $T_{\text{inst}}$, TST) presentan distribuciones con cola larga: unos pocos UEs sufren múltiples reintentos y producen valores muy por encima del promedio. La media muestral es sensible a esta cola; la mediana y los percentiles no \cite{ref34}. Por ello $T_{\text{access}}$ se reporta simultáneamente como media, mediana ($p50$) y percentil $95$ ($p95$): la media captura el agregado, la mediana captura el comportamiento típico y el $p95$ acota el peor caso de la cola. Adicionalmente, el SDP(T) (probabilidad de éxito antes de $T$~s, normalizada por el total de UEs) y la TST (\emph{makespan} de la oleada de acceso, es decir, el conjunto de UEs activos en la ventana de simulación) son métricas distribucionales, robustas por construcción a outliers individuales. Las curvas de $\mathrm{SDP}(T)$ vs.\ $K$ (\cref{fig:res_sdp}) y los diagramas de caja de $T_{\text{access}}$ por punto operativo (\cref{fig:res_box_taccess} y siguientes) permiten observar la distribución de cada KPI más allá del estadístico de resumen único.
 
-Las métricas de latencia ($T_{\text{access}}$, $T_{\text{inst}}$, TST) presentan distribuciones con cola larga: unos pocos UEs sufren múltiples reintentos y producen valores muy por encima del promedio. La media muestral es sensible a esta cola; la mediana y los percentiles no \cite{ref34}. Por ello $T_{\text{access}}$ se reporta simultáneamente como media, mediana ($p50$) y percentil $95$ ($p95$): la media captura el agregado, la mediana captura el comportamiento típico y el $p95$ acota el caso peor de la cola. Adicionalmente, el SDP(T) (probabilidad de éxito antes de $T$~s, normalizada por el total de UEs) y la TST (\emph{makespan} de la oleada) son métricas distribucionales que son por construcción robustas a outliers individuales. Las curvas de $\mathrm{SDP}(T)$ vs.\ $K$ (\cref{fig:res_sdp}) y los diagramas de caja de $T_{\text{access}}$ por punto operativo (\cref{fig:res_box_taccess} y siguientes) reportan la distribución de cada KPI más allá del estadístico de resumen único.
-
-\subsection{Comparación entre esquemas: prueba de Wilcoxon}
-\label{sec:res_config_wilcoxon}
-
-Las diferencias entre esquemas se contrastan con la prueba de Wilcoxon de rangos con signo \cite{ref34}, una prueba no paramétrica que no requiere normalidad de los datos y que es robusta frente a outliers. Se reporta una diferencia como \emph{estadísticamente significativa} cuando $p<0{,}05$. La elección de Wilcoxon sobre $t$-pareado se justifica por dos razones: (i) varias métricas saturan cerca de $1{,}0$ (SAR en regímenes moderados), lo que produce distribuciones de diferencias claramente no gaussianas; (ii) las pruebas no paramétricas son la convención en estudios system-level de NB-IoT \cite{ref24,ref25}.
+Las diferencias entre esquemas se contrastan con la prueba de Wilcoxon de rangos con signo \cite{ref34}, una prueba no paramétrica que no requiere normalidad de los datos y que es robusta frente a outliers. Se reporta una diferencia como estadísticamente significativa cuando $p<0{,}05$. La elección de Wilcoxon sobre $t$-pareado se justifica por dos razones: (i) varias métricas saturan cerca de $1{,}0$ (SAR en regímenes moderados), lo que produce distribuciones de diferencias claramente no gaussianas; (ii) las pruebas no paramétricas son la convención en estudios system-level de NB-IoT \cite{ref24,ref25}.
 
 \subsection{Outliers y verificación de robustez}
 \label{sec:res_config_outliers}
 
-Para cuantificar la sensibilidad a outliers se aplica la regla de Tukey $1{,}5\cdot$IQR sobre las $30$ muestras por celda: una observación se clasifica como outlier si cae fuera del intervalo $[Q_1 - 1{,}5\cdot\text{IQR},\, Q_3 + 1{,}5\cdot\text{IQR}]$, criterio idéntico al empleado por el diagrama de cajas estándar de MATLAB y matplotlib. El análisis completo se detalla en la \cref{sec:res_e1_outliers} (\cref{tab:res_outliers}); brevemente: los outliers detectados corresponden mayoritariamente a UEs que sufrieron varios reintentos consecutivos. Son \emph{datos reales} que representan la cola legítima del proceso de acceso, no errores de medición; por ello \emph{se conservan} en el análisis y se reportan por transparencia.
+Para cuantificar la sensibilidad a outliers se aplica la regla de Tukey $1{,}5\cdot$IQR sobre las $30$ muestras por celda: una observación se clasifica como outlier si cae fuera del intervalo $[Q_1 - 1{,}5\cdot\text{IQR},\, Q_3 + 1{,}5\cdot\text{IQR}]$, criterio idéntico al empleado por el diagrama de cajas estándar de MATLAB y matplotlib. El análisis completo se detalla en la \cref{sec:res_e1_outliers} (\cref{tab:res_outliers}); los outliers detectados —hasta un $10\%$ de las muestras en los puntos más cargados— corresponden mayoritariamente a UEs que sufrieron varios reintentos consecutivos. Son datos reales que representan la cola legítima del proceso de acceso, no errores de medición; por ello se conservan en el análisis y se reportan por transparencia.
 
 Para validar la asunción gaussiana del IC $t$-Student se calculó un IC al $95\%$ por bootstrap percentile (10\,000 réplicas con reemplazo sobre las 30 semillas, semilla $42$). La \cref{tab:res_bootstrap} contrasta ambos métodos en cuatro puntos de operación críticos. La coincidencia entre los anchos de los IC (diferencia $\leq 8\%$) indica que el reporte basado en $t$-Student no se ve afectado significativamente por la asunción de normalidad para los puntos de operación considerados.
 
@@ -95,21 +87,21 @@ Para validar la asunción gaussiana del IC $t$-Student se calculó un IC al $95\
 \toprule
 \textbf{Escenario} & \textbf{Esquema} & \textbf{Media} & \textbf{IC $t$-Student} & \textbf{IC bootstrap} & \textbf{$\Delta$ ancho} \\
 \midrule
-E1\_high $K{=}100$ & Legacy & 0.825 & [0.777,\,0.872] & [0.781,\,0.869] & 6.8\,\% \\
- & CRACS-R & 1.000 & [1.000,\,1.000] & [1.000,\,1.000] & 0.0\,\% \\
- & CRACS-T & 1.000 & [1.000,\,1.000] & [1.000,\,1.000] & 0.0\,\% \\
+E1\_high $K{=}100$ & Legacy & $0{,}825$ & $[0{,}777,\,0{,}872]$ & $[0{,}781,\,0{,}869]$ & $6{,}8$\,\% \\
+ & CRACS-R & $1{,}000$ & $[1{,}000,\,1{,}000]$ & $[1{,}000,\,1{,}000]$ & $0{,}0$\,\% \\
+ & CRACS-T & $1{,}000$ & $[1{,}000,\,1{,}000]$ & $[1{,}000,\,1{,}000]$ & $0{,}0$\,\% \\
 \addlinespace[2pt]
-E6\_burst $K{=}300$ & Legacy & 0.532 & [0.508,\,0.557] & [0.508,\,0.555] & 6.4\,\% \\
- & CRACS-R & 0.783 & [0.747,\,0.819] & [0.749,\,0.817] & 6.1\,\% \\
- & CRACS-T & 0.562 & [0.517,\,0.606] & [0.522,\,0.607] & 4.9\,\% \\
+E6\_burst $K{=}300$ & Legacy & $0{,}532$ & $[0{,}508,\,0{,}557]$ & $[0{,}508,\,0{,}555]$ & $6{,}4$\,\% \\
+ & CRACS-R & $0{,}783$ & $[0{,}747,\,0{,}819]$ & $[0{,}749,\,0{,}817]$ & $6{,}1$\,\% \\
+ & CRACS-T & $0{,}562$ & $[0{,}517,\,0{,}606]$ & $[0{,}522,\,0{,}607]$ & $4{,}9$\,\% \\
 \addlinespace[2pt]
-E6\_uniform $K{=}1000$ & Legacy & 0.185 & [0.182,\,0.188] & [0.182,\,0.188] & 6.3\,\% \\
- & CRACS-R & 0.783 & [0.757,\,0.809] & [0.759,\,0.807] & 7.9\,\% \\
- & CRACS-T & 0.571 & [0.537,\,0.606] & [0.538,\,0.604] & 4.7\,\% \\
+E6\_uniform $K{=}1000$ & Legacy & $0{,}185$ & $[0{,}182,\,0{,}188]$ & $[0{,}182,\,0{,}188]$ & $6{,}3$\,\% \\
+ & CRACS-R & $0{,}783$ & $[0{,}757,\,0{,}809]$ & $[0{,}759,\,0{,}807]$ & $7{,}9$\,\% \\
+ & CRACS-T & $0{,}571$ & $[0{,}537,\,0{,}606]$ & $[0{,}538,\,0{,}604]$ & $4{,}7$\,\% \\
 \addlinespace[2pt]
-E7\_t300 $T_{300}{=}5$~s & Legacy & 0.540 & [0.515,\,0.564] & [0.516,\,0.562] & 5.2\,\% \\
- & CRACS-R & 0.783 & [0.747,\,0.819] & [0.749,\,0.817] & 6.1\,\% \\
- & CRACS-T & 0.562 & [0.517,\,0.606] & [0.522,\,0.607] & 4.9\,\% \\
+E7\_t300 $T_{300}{=}5$~s & Legacy & $0{,}540$ & $[0{,}515,\,0{,}564]$ & $[0{,}516,\,0{,}562]$ & $5{,}2$\,\% \\
+ & CRACS-R & $0{,}783$ & $[0{,}747,\,0{,}819]$ & $[0{,}749,\,0{,}817]$ & $6{,}1$\,\% \\
+ & CRACS-T & $0{,}562$ & $[0{,}517,\,0{,}606]$ & $[0{,}522,\,0{,}607]$ & $4{,}9$\,\% \\
 \addlinespace[2pt]
 \bottomrule
 \end{tabular}
@@ -118,7 +110,7 @@ E7\_t300 $T_{300}{=}5$~s & Legacy & 0.540 & [0.515,\,0.564] & [0.516,\,0.562] & 
 \section{Validación de coherencia (E0)}
 \label{sec:res_e0}
 
-El escenario E0 ($K=1$, sin contención posible) constituye la prueba de coherencia del simulador: en ausencia de colisiones los tres esquemas deben comportarse de forma idéntica. La \cref{tab:res_e0} confirma esa equivalencia. Los tres esquemas alcanzaron $\mathrm{SAR}=1{,}000$ con $T_{\text{access}} = 345{,}019$~ms (desviación estándar muestral $s = 0{,}012$~ms entre las 30 semillas, equivalente a un IC al 95\,\% por $t$-Student de $\pm 0{,}004$~ms, reportado en \cref{tab:res_e0}) y exactamente un único intento de preámbulo. No se observó divergencia alguna en el régimen sin contención ($K=1$), lo cual descarta sesgos de implementación independientes de la contención y es consistente con atribuir a la dinámica de contención las diferencias observadas en los escenarios con $K>1$.
+El escenario E0 ($K=1$, sin contención posible) constituye la prueba de coherencia del simulador: en ausencia de colisiones los tres esquemas deben comportarse de forma idéntica. La \cref{tab:res_e0} confirma esa equivalencia. Los tres esquemas alcanzaron una SAR perfecta ($\mathrm{SAR}=1{,}000$, es decir, sin ningún preámbulo colisionado) con $T_{\text{access}} = 345{,}019$~ms (desviación estándar muestral $s = 0{,}012$~ms entre las 30 semillas, equivalente a un IC al 95\,\% por $t$-Student de $\pm 0{,}004$~ms, reportado en \cref{tab:res_e0}) y exactamente un único intento de preámbulo. No se observó divergencia alguna en el régimen sin contención ($K=1$), lo cual descarta sesgos de implementación independientes de la contención y es consistente con atribuir a la dinámica de contención las diferencias observadas en los escenarios con $K>1$.
 
 \begin{table}[!t]
 \centering
@@ -140,18 +132,18 @@ CRACS-T  & $1{,}000$ & $345{,}019 \pm 0{,}004$ & $1{,}00$ \\
 \section{Curva de capacidad bajo carga moderada e intensa}
 \label{sec:res_e1}
 
-Los escenarios E1 y E1\_high barren la carga $K \in \{1, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100\}$ bajo perfil de tráfico moderado (avg, $\lambda \approx 7{,}3$~UEs/s) e intenso (high, $\lambda \approx 27{,}8$~UEs/s) respectivamente. La \cref{fig:res_sar} compara la SAR de los tres esquemas en ambos regímenes; la \cref{fig:res_taccess} reporta la latencia media de acceso $T_{\text{access}}$ y la \cref{fig:res_sdp} la métrica conjunta latencia--confiabilidad $\mathrm{SDP}(3\text{~s})$ (probabilidad de éxito antes de 3~s sobre el \emph{total} de UEs).
+Los escenarios E1 y E1\_high barren la carga $K \in \{1, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100\}$ bajo perfil de tráfico moderado (avg, $\lambda \approx 7{,}3$~UEs/s) e intenso (high, $\lambda \approx 27{,}8$~UEs/s) respectivamente. La \cref{fig:res_sar} compara la SAR de los tres esquemas en ambos regímenes; en la \cref{fig:res_taccess} se presenta la latencia media de acceso $T_{\text{access}}$, y en la \cref{fig:res_sdp}, la métrica conjunta latencia--confiabilidad $\mathrm{SDP}(3\text{~s})$ (probabilidad de éxito antes de 3~s sobre el total de UEs).
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{fig91_sar_vs_k.pdf}
-\caption{Tasa de acceso exitoso ($\mathrm{SAR}$) en función de la carga $K$ para los tres esquemas bajo perfil de tráfico moderado (a) e intenso (b). Las barras de error muestran el intervalo de confianza al $95\%$ sobre $n=30$ semillas.}
+\caption{Tasa de acceso exitoso ($\mathrm{SAR}$) en función de la carga $K$ para los tres esquemas bajo perfil de tráfico moderado (a) e intenso (b).}
 \label{fig:res_sar}
 \end{figure}
 
-Bajo perfil avg la SAR de Legacy se mantuvo $\geq 0{,}999$ hasta $K=50$ ($0{,}9987$) y descendió a $0{,}965$ a $K=75$ y $0{,}903$ a $K=100$. CRACS-R y CRACS-T conservaron $\mathrm{SAR} \approx 1{,}000$ en todo el rango (CRACS-R: $0{,}996$ a $K=100$). Bajo perfil high la SAR de Legacy descendió antes y con mayor magnitud absoluta, cayendo a $0{,}825$ a $K=100$ ($\Delta = -0{,}078$ frente al perfil avg al mismo $K$); CRACS-R y CRACS-T se mantuvieron ambos en $\mathrm{SAR}=1{,}000$ a $K=100$. En este régimen la SAR no separa CRACS-R de CRACS-T: ambos saturan la métrica en su techo.
+Bajo perfil avg la SAR de Legacy se mantuvo $\geq 0{,}999$ hasta $K=50$ ($0{,}9987$) y descendió a $0{,}965$ a $K=75$ y $0{,}903$ a $K=100$ (barras de error: IC al $95\%$ sobre $n=30$ semillas). CRACS-R y CRACS-T conservaron una SAR cercana al valor máximo ($\mathrm{SAR}\approx 1$) en todo el rango (CRACS-R: $0{,}996$ a $K=100$). Bajo perfil high la SAR de Legacy descendió antes y con mayor magnitud absoluta, cayendo a $0{,}825$ a $K=100$ ($\Delta = -0{,}078$ frente al perfil avg al mismo $K$); CRACS-R y CRACS-T se mantuvieron ambos con SAR perfecta ($\mathrm{SAR}=1{,}000$) a $K=100$. En este régimen la SAR no separa CRACS-R de CRACS-T: ambos saturan la métrica en su techo.
 
-La separación entre CRACS-R y CRACS-T se hace visible en la \cref{fig:res_taccess}. A $K=100$ bajo perfil avg, $T_{\text{access}}$ de CRACS-T fue $638{,}4$~ms, frente a $2\,510{,}5$~ms de CRACS-R ($\times 3{,}9$~veces mayor) y $8\,651{,}6$~ms de Legacy ($\times 13{,}6$~veces mayor). Bajo perfil high a $K=100$, los valores fueron $2\,682{,}7$, $3\,531{,}3$ y $11\,961{,}7$~ms para CRACS-T, CRACS-R y Legacy respectivamente. La prueba de Wilcoxon entre CRACS-R y CRACS-T sobre $T_{\text{access}}$ bajo perfil high arrojó $p=4{,}66\times 10^{-3}$ a $K=100$ y $p=3{,}74\times 10^{-3}$ a $K=75$, ambos significativos.
+Para la latencia de acceso, la \cref{fig:res_taccess} muestra que $T_{\text{access}}$ de CRACS-T es sustancialmente menor que la de CRACS-R y Legacy en todo el rango de $K$. A $K=100$ bajo perfil avg, $T_{\text{access}}$ de CRACS-T fue $638{,}4$~ms, frente a $2\,510{,}5$~ms de CRACS-R (3,9 veces mayor) y $8\,651{,}6$~ms de Legacy (13,6 veces mayor). Bajo perfil high a $K=100$, los valores fueron $2\,682{,}7$, $3\,531{,}3$ y $11\,961{,}7$~ms para CRACS-T, CRACS-R y Legacy respectivamente; la prueba de Wilcoxon confirmó que la diferencia CRACS-R/CRACS-T es significativa ($p=4{,}66\times 10^{-3}$ a $K=100$, $p=3{,}74\times 10^{-3}$ a $K=75$). Esta reducción de casi un orden de magnitud en $T_{\text{access}}$ es relevante en NB-IoT porque el consumo energético del UE está dominado por el tiempo que el radio permanece encendido durante el acceso: menos latencia se traduce directamente en mayor autonomía de batería, un objetivo central del estándar.
 
 \begin{figure}[!t]
 \centering
@@ -167,7 +159,7 @@ La separación entre CRACS-R y CRACS-T se hace visible en la \cref{fig:res_tacce
 \label{fig:res_sdp}
 \end{figure}
 
-La métrica $\mathrm{SDP}(3\text{~s})$ (\cref{fig:res_sdp}) cuantifica simultáneamente confiabilidad y latencia. A $K=100$ bajo avg, CRACS-T alcanzó $\mathrm{SDP}(3\text{~s})=0{,}994$ frente a $0{,}672$ de CRACS-R y $0{,}323$ de Legacy; bajo high los valores fueron $0{,}602$, $0{,}467$ y $0{,}185$. La \cref{tab:res_e1_k100} consolida los principales KPIs en el punto operativo $K=100$.
+$\mathrm{SDP}(3\text{~s})$ combina confiabilidad y latencia en una sola cifra (\cref{fig:res_sdp}). A $K=100$ bajo avg, CRACS-T alcanzó $\mathrm{SDP}(3\text{~s})=0{,}994$ frente a $0{,}672$ de CRACS-R y $0{,}323$ de Legacy; bajo high los valores fueron $0{,}602$, $0{,}467$ y $0{,}185$. A $K=100$, CRACS-T domina las cinco métricas de la \cref{tab:res_e1_k100} (SAR, $\mathrm{SAR}_1$, $T_{\text{acc}}$, $T_{\text{acc}}^{p95}$, SDP).
 
 \begin{table}[!t]
 \centering
@@ -192,16 +184,16 @@ CRACS-T & $1{,}000$ & $0{,}500$ & $\mathbf{2\,682{,}7}$ & $\mathbf{6\,259}$ & $\
 \end{tabular}
 \end{table}
 
-La conjetura de inclusión \emph{ex-ante} se cumple en este régimen: $\Omega_{\text{Legacy}} \subsetneq \Omega_{\text{CRACS-R}} \approx \Omega_{\text{CRACS-T}}$ en términos de SAR ($K \leq 100$), y la jerarquía se vuelve estricta en términos de $T_{\text{access}}$ y $\mathrm{SDP}$. Es decir, la separación CRACS-T sobre CRACS-R en esta franja de carga es de \emph{eficiencia de acceso}, no de \emph{capacidad bruta}: ambos esquemas admiten todos los UEs, pero CRACS-T lo hace al primer intento el $94{,}8\%$ de las veces frente al $44{,}4\%$ de CRACS-R, gracias a la asignación determinista de codebook SCMA por clúster.
+La conjetura de inclusión \emph{ex-ante} se cumple en este régimen: $\Omega_{\text{Legacy}} \subsetneq \Omega_{\text{CRACS-R}} \approx \Omega_{\text{CRACS-T}}$ en términos de SAR ($K \leq 100$), y la jerarquía se vuelve estricta en términos de $T_{\text{access}}$ y $\mathrm{SDP}$. Es decir, la separación CRACS-T sobre CRACS-R en esta franja de carga es de eficiencia de acceso, no de capacidad bruta: ambos esquemas admiten todos los UEs, pero CRACS-T lo hace al primer intento el $94{,}8\%$ de las veces frente al $44{,}4\%$ de CRACS-R, gracias a la asignación determinista de codebook SCMA por clúster.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{fig99_boxplot_taccess_K100.pdf}
-\caption{Distribución de $T_{\text{access}}$ medio a $K{=}100$ bajo perfil moderado (a) e intenso (b). Las cajas muestran $Q_1$--$Q_3$, la línea central la mediana, los bigotes el rango Tukey $1{,}5\cdot$IQR y las cruces rojas los outliers individuales (UEs con múltiples reintentos). Eje vertical logarítmico.}
+\caption{Distribución de $T_{\text{access}}$ medio a $K{=}100$ bajo perfil moderado (a) e intenso (b). Eje vertical logarítmico.}
 \label{fig:res_box_taccess}
 \end{figure}
 
-La \cref{fig:res_box_taccess} complementa la \cref{fig:res_taccess} mostrando la distribución completa de las 30 muestras por esquema. Se desprenden tres observaciones cuantitativas: (i) la mediana de CRACS-T es $3{,}6\times$ menor que la de CRACS-R y $11{,}7\times$ menor que la de Legacy bajo perfil avg, y $1{,}7\times$ menor que CRACS-R y $5{,}6\times$ menor que Legacy bajo perfil high (medianas calculadas sobre las 30 semillas a $K=100$); (ii) las cajas de Legacy presentan asimetría hacia arriba (cola larga superior) consistente con la distancia entre su media y su mediana reportada en \cref{tab:res_e1_k100}; (iii) los outliers visibles en Legacy y, en menor medida, en CRACS-R caen por encima del cuartil superior, comportamiento consistente con corridas donde un subconjunto de UEs requirió retransmisiones adicionales, aunque la atribución a UE individual con múltiples reintentos no se verifica directamente a nivel de trayectoria por UE en esta lectura agregada.
+La \cref{fig:res_box_taccess} complementa la \cref{fig:res_taccess} mostrando la distribución completa de las 30 muestras por esquema. Las cajas muestran $Q_1$--$Q_3$; la línea central, la mediana; los bigotes, el rango Tukey $1{,}5\cdot$IQR; y las cruces rojas, los outliers individuales (UEs con múltiples reintentos) — convención que se reutiliza en los siguientes diagramas de caja del capítulo. Se desprenden tres observaciones cuantitativas: (i) bajo perfil avg, la mediana de CRACS-T es 3,6 veces menor que la de CRACS-R y 11,7 veces menor que la de Legacy; bajo perfil high, 1,7 veces menor que CRACS-R y 5,6 veces menor que Legacy (medianas calculadas sobre las 30 semillas a $K=100$); (ii) las cajas de Legacy presentan asimetría hacia arriba (cola larga superior) consistente con la distancia entre su media y su mediana reportada en \cref{tab:res_e1_k100}; (iii) los outliers visibles en Legacy y, en menor medida, en CRACS-R caen por encima del cuartil superior, comportamiento consistente con simulaciones donde un subconjunto de UEs requirió retransmisiones adicionales. No fue posible confirmar, a nivel de UE individual, si estos outliers corresponden a UEs con múltiples reintentos, ya que el análisis se realizó sobre datos agregados por semilla, no por trayectoria de UE.
 
 \subsection{Análisis de outliers y robustez del análisis}
 \label{sec:res_e1_outliers}
@@ -219,37 +211,35 @@ Para cuantificar la sensibilidad del análisis a los outliers observados se apli
 \toprule
 \textbf{Escenario} & \textbf{KPI} & \textbf{Esquema} & $\boldsymbol{n}$ & \textbf{\#out} & \textbf{\%out} & \textbf{media} & \textbf{media excl.} & $\boldsymbol{\Delta\%}$ \\
 \midrule
-E1 $K{=}100$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 0 & 0.0 & 8651.6 & 8651.6 & $+0{,}0$ \\
- & & CRACS-R & 30 & 1 & 3.3 & 2510.5 & 2429.9 & $-3{,}2$ \\
- & & CRACS-T & 30 & 1 & 3.3 & 638.4 & 630.9 & $-1{,}2$ \\
+E1 $K{=}100$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 0 & $0{,}0$ & $8\,651{,}6$ & $8\,651{,}6$ & $+0{,}0$ \\
+ & & CRACS-R & 30 & 1 & $3{,}3$ & $2\,510{,}5$ & $2\,429{,}9$ & $-3{,}2$ \\
+ & & CRACS-T & 30 & 1 & $3{,}3$ & $638{,}4$ & $630{,}9$ & $-1{,}2$ \\
 \addlinespace[2pt]
-E1\_high $K{=}100$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 0 & 0.0 & 11961.7 & 11961.7 & $+0{,}0$ \\
- & & CRACS-R & 30 & 0 & 0.0 & 3531.3 & 3531.3 & $+0{,}0$ \\
- & & CRACS-T & 30 & 0 & 0.0 & 2682.7 & 2682.7 & $+0{,}0$ \\
+E1\_high $K{=}100$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 0 & $0{,}0$ & $11\,961{,}7$ & $11\,961{,}7$ & $+0{,}0$ \\
+ & & CRACS-R & 30 & 0 & $0{,}0$ & $3\,531{,}3$ & $3\,531{,}3$ & $+0{,}0$ \\
+ & & CRACS-T & 30 & 0 & $0{,}0$ & $2\,682{,}7$ & $2\,682{,}7$ & $+0{,}0$ \\
 \addlinespace[2pt]
-E6\_burst $K{=}300$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 3 & 10.0 & 28359.8 & 28612.5 & $+0{,}9$ \\
- & & CRACS-R & 30 & 1 & 3.3 & 6671.0 & 6789.2 & $+1{,}8$ \\
- & & CRACS-T & 30 & 0 & 0.0 & 5311.3 & 5311.3 & $+0{,}0$ \\
+E6\_burst $K{=}300$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 3 & $10{,}0$ & $28\,359{,}8$ & $28\,612{,}5$ & $+0{,}9$ \\
+ & & CRACS-R & 30 & 1 & $3{,}3$ & $6\,671{,}0$ & $6\,789{,}2$ & $+1{,}8$ \\
+ & & CRACS-T & 30 & 0 & $0{,}0$ & $5\,311{,}3$ & $5\,311{,}3$ & $+0{,}0$ \\
 \addlinespace[2pt]
-E6\_uniform $K{=}1000$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 0 & 0.0 & 8031.9 & 8031.9 & $+0{,}0$ \\
- & & CRACS-R & 30 & 0 & 0.0 & 5511.9 & 5511.9 & $+0{,}0$ \\
- & & CRACS-T & 30 & 0 & 0.0 & 5711.5 & 5711.5 & $+0{,}0$ \\
+E6\_uniform $K{=}1000$ & $T_{\text{access}}$ (ms) & Legacy & 30 & 0 & $0{,}0$ & $8\,031{,}9$ & $8\,031{,}9$ & $+0{,}0$ \\
+ & & CRACS-R & 30 & 0 & $0{,}0$ & $5\,511{,}9$ & $5\,511{,}9$ & $+0{,}0$ \\
+ & & CRACS-T & 30 & 0 & $0{,}0$ & $5\,711{,}5$ & $5\,711{,}5$ & $+0{,}0$ \\
 \addlinespace[2pt]
-E7\_t300 $T_{300}{=}5$~s & SAR & Legacy & 30 & 2 & 6.7 & 0.540 & 0.552 & $+2{,}2$ \\
- & & CRACS-R & 30 & 0 & 0.0 & 0.783 & 0.783 & $+0{,}0$ \\
- & & CRACS-T & 30 & 1 & 3.3 & 0.562 & 0.551 & $-2{,}0$ \\
+E7\_t300 $T_{300}{=}5$~s & SAR & Legacy & 30 & 2 & $6{,}7$ & $0{,}540$ & $0{,}552$ & $+2{,}2$ \\
+ & & CRACS-R & 30 & 0 & $0{,}0$ & $0{,}783$ & $0{,}783$ & $+0{,}0$ \\
+ & & CRACS-T & 30 & 1 & $3{,}3$ & $0{,}562$ & $0{,}551$ & $-2{,}0$ \\
 \addlinespace[2pt]
-E7\_t300 $T_{300}{=}40$~s & SAR & Legacy & 30 & 3 & 10.0 & 0.349 & 0.359 & $+2{,}7$ \\
- & & CRACS-R & 30 & 0 & 0.0 & 0.788 & 0.788 & $+0{,}0$ \\
- & & CRACS-T & 30 & 0 & 0.0 & 0.843 & 0.843 & $+0{,}0$ \\
+E7\_t300 $T_{300}{=}40$~s & SAR & Legacy & 30 & 3 & $10{,}0$ & $0{,}349$ & $0{,}359$ & $+2{,}7$ \\
+ & & CRACS-R & 30 & 0 & $0{,}0$ & $0{,}788$ & $0{,}788$ & $+0{,}0$ \\
+ & & CRACS-T & 30 & 0 & $0{,}0$ & $0{,}843$ & $0{,}843$ & $+0{,}0$ \\
 \addlinespace[2pt]
 \bottomrule
 \end{tabular}
 \end{table}
 
-Tres observaciones se desprenden de la \cref{tab:res_outliers}. Primero, la tasa de outliers fue baja: el máximo observado fue $10{,}0\%$ (Legacy en E6\_burst $K{=}300$ y en E7\_t300 $T_{300}{=}40$~s); la mayoría de las celdas tienen cero outliers. Segundo, los outliers se concentran en Legacy (esquema con la cola más larga observada en el barrido, consistente con la ausencia de multicapa SCMA aunque no medida específicamente sobre los UEs outlier) y son prácticamente nulos en CRACS-R/CRACS-T para SAR. Tercero, y más importante: el cambio relativo de la media al excluir los outliers ($\Delta\%$) se mantuvo por debajo del $\pm 3{,}5\%$ en todos los casos, y las conclusiones cualitativas (CRACS-T $\ll$ Legacy en latencia, CRACS-R $>$ CRACS-T en SAR a saturación) son idénticas al excluirlos.
-
-Los outliers se conservaron en el análisis principal porque representan UEs reales del proceso de acceso aleatorio que sufrieron varios reintentos hasta el éxito; descartarlos sesgaría el comportamiento del sistema en su cola, justamente la zona donde las propuestas se diferencian del baseline.
+De la \cref{tab:res_outliers} se desprende que la tasa de outliers fue baja: el máximo observado fue $10{,}0\%$ (Legacy en E6\_burst $K{=}300$ y en E7\_t300 $T_{300}{=}40$~s), y la mayoría de las celdas tienen cero outliers. Los outliers se concentran en Legacy, el esquema con la cola más larga observada en el barrido, y son prácticamente nulos en CRACS-R/CRACS-T para SAR; esto es consistente con la ausencia de multicapa SCMA en Legacy, aunque no se midió específicamente sobre los UEs outlier. Más importante aún, el cambio relativo de la media al excluir los outliers ($\Delta\%$) se mantuvo por debajo del $\pm 3{,}5\%$ en todos los casos, y las conclusiones cualitativas (CRACS-T $\ll$ Legacy en latencia, CRACS-R $>$ CRACS-T en SAR a saturación) son idénticas al excluirlos. Por esta razón los outliers se conservaron en el análisis principal: representan UEs reales del proceso de acceso aleatorio que sufrieron varios reintentos hasta el éxito, y descartarlos sesgaría el comportamiento del sistema en su cola, justamente la zona donde las propuestas se diferencian del baseline.
 
 \section{Calibración del parámetro de agrupamiento (E4)}
 \label{sec:res_e4}
@@ -263,7 +253,7 @@ El escenario E4 barre $\Delta d_{\min} \in \{50, 100, 150, 200, 300, 500, 750, 1
 \label{fig:res_dmin}
 \end{figure}
 
-En todo el rango probado el número medio de clústeres se mantuvo cerca o en el techo $K_{\text{CB}}=6$ ($5{,}67$--$5{,}77$ en avg; $6{,}00$ exacto en high) y la SAR fue $1{,}000$ en todos los puntos. El parámetro $\Delta d_{\min}$ no resultó ser sensible en el rango $[50, 1000]$~m: la dispersión diferencial $\Delta d$ dentro de la celda satura el techo de codebooks en todos los valores probados, lo cual explica la meseta observada. Esto valida empíricamente el valor por defecto $\Delta d_{\min}=150$~m elegido en el \cref{ch:diseno} y muestra que el clustering ToA de CRACS-T es robusto a esta calibración dentro del rango probado $[50, 1000]$~m (un factor de $20\times$, equivalente a $\approx 1{,}3$ órdenes de magnitud); el comportamiento fuera de ese rango no se caracterizó. El criterio C3 (precisión de agrupamiento) se cumple holgadamente: la tasa de identificación incorrecta de clúster (CID) se mantuvo por debajo del $3{,}5\%$ en todo el barrido.
+En todo el rango probado el número medio de clústeres se mantuvo cerca o en el techo $K_{\text{CB}}=6$: entre $5{,}67$ y $5{,}77$ bajo perfil moderado, y exactamente $6{,}00$ bajo perfil intenso; la SAR fue $1{,}000$ en todos los puntos. El parámetro $\Delta d_{\min}$ no resultó ser sensible en el rango $[50, 1000]$~m: la dispersión diferencial $\Delta d$ dentro de la celda satura el techo de codebooks en todos los valores probados, lo cual explica la meseta observada. Esto valida empíricamente el valor por defecto $\Delta d_{\min}=150$~m elegido en el \cref{ch:diseno} y muestra que el clustering ToA de CRACS-T es robusto a esta calibración dentro del rango probado $[50, 1000]$~m. El criterio C3 (precisión de agrupamiento) se cumple holgadamente: la tasa de identificación incorrecta de clúster (CID) se mantuvo por debajo del $3{,}5\%$ en todo el barrido.
 
 \section{Robustez al pool de preámbulos NPRACH (E5)}
 \label{sec:res_e5}
@@ -300,9 +290,9 @@ E6\_uniform y E6\_burst barren $K \in \{30, 100, 300, 1000\}$ bajo los dos model
 \label{fig:res_e6_latency}
 \end{figure}
 
-Bajo TM1 el sistema degradó de forma monótona: a $K=300$ la SAR fue $0{,}609$, $0{,}980$ y $0{,}994$ para Legacy, CRACS-R y CRACS-T respectivamente, satisfaciendo la jerarquía ex-ante. A $K=1000$, sin embargo, se observó una \emph{inversión}: $\mathrm{SAR}_{\text{CRACS-R}} = 0{,}783$ superó a $\mathrm{SAR}_{\text{CRACS-T}} = 0{,}571$ (Wilcoxon $p = 5{,}6\times 10^{-9}$, altamente significativa). Bajo TM2 la inversión apareció antes: ya a $K=300$ CRACS-R alcanzó $\mathrm{SAR}=0{,}783$ frente a $0{,}562$ de CRACS-T (Wilcoxon $p=3{,}5\times 10^{-8}$); a $K=1000$ ambos esquemas colapsaron a valores cercanos ($0{,}150$ y $0{,}147$ respectivamente, sin diferencia significativa).
+Bajo TM1 el sistema degradó de forma monótona: a $K=300$ la SAR fue $0{,}609$, $0{,}980$ y $0{,}994$ para Legacy, CRACS-R y CRACS-T respectivamente, satisfaciendo la jerarquía ex-ante. A $K=1000$, sin embargo, se observó una inversión: $\mathrm{SAR}_{\text{CRACS-R}} = 0{,}783$ superó a $\mathrm{SAR}_{\text{CRACS-T}} = 0{,}571$ (Wilcoxon $p = 5{,}6\times 10^{-9}$, altamente significativa). Bajo TM2 la inversión apareció antes: ya a $K=300$ CRACS-R alcanzó $\mathrm{SAR}=0{,}783$ frente a $0{,}562$ de CRACS-T (Wilcoxon $p=3{,}5\times 10^{-8}$); a $K=1000$ ambos esquemas colapsaron a valores cercanos ($0{,}150$ y $0{,}147$ respectivamente, sin diferencia significativa).
 
-A pesar de la inversión en SAR, CRACS-T conservó ventaja en latencia bajo cargas intermedias. A $K=100$ ráfaga, su TST fue $10{,}5$~s frente a $14{,}4$~s de CRACS-R y $34{,}0$~s de Legacy; su $\mathrm{SDP}(3\text{~s})$ fue $0{,}844$ frente a $0{,}521$ y $0{,}243$ respectivamente. Es decir: bajo saturación extrema CRACS-R admite más UEs eventualmente, mientras CRACS-T resuelve el acceso de los UEs admitidos en TST $3{,}2\times$ y $1{,}4\times$ menor que Legacy y CRACS-R respectivamente. Este \emph{trade-off} de régimen es el motivo de la sensibilidad al timer $T_{300}$ caracterizada en la sección siguiente.
+A pesar de la inversión en SAR, CRACS-T conservó ventaja en latencia bajo cargas intermedias. A $K=100$ ráfaga, su TST fue $10{,}5$~s frente a $14{,}4$~s de CRACS-R y $34{,}0$~s de Legacy; su $\mathrm{SDP}(3\text{~s})$ fue $0{,}844$ frente a $0{,}521$ y $0{,}243$ respectivamente. Es decir: bajo saturación extrema CRACS-R admite más UEs eventualmente, mientras CRACS-T resuelve el acceso de los UEs admitidos con un TST 3,2 veces menor que Legacy y 1,4 veces menor que CRACS-R. Este \emph{trade-off} de régimen es el motivo de la sensibilidad al timer $T_{300}$ caracterizada en la sección siguiente.
 
 \begin{figure}[!t]
 \centering
@@ -375,7 +365,7 @@ La \cref{fig:res_box_t300} consolida los tres comportamientos a nivel distribuci
 \section{Contraste con los criterios de aceptación}
 \label{sec:res_criterios}
 
-La \cref{tab:res_criterios} contrasta los cinco criterios C1--C5 de la \cref{sec:design_criterios} con los hallazgos empíricos.
+La \cref{tab:res_criterios} contrasta los cinco criterios C1--C5 con los hallazgos empíricos.
 
 \begin{table}[!t]
 \centering
@@ -387,7 +377,7 @@ La \cref{tab:res_criterios} contrasta los cinco criterios C1--C5 de la \cref{sec
 \toprule
 \textbf{Crit.} & \textbf{Veredicto} & \textbf{Evidencia y matiz} \\
 \midrule
-C1 & Cumple cond. & $\mathrm{SAR}_{\text{CRACS-T}} > \mathrm{SAR}_{\text{CRACS-R}}$ se cumple para $K \leq 100$ bajo avg/high y para $T_{300} \geq 10$~s en saturación. \emph{No se cumple} bajo $T_{300}=5$~s a $K \geq 300$ ráfaga, valor que coincide con el por defecto del estándar (\cref{sec:res_e6,sec:res_e7}). \\
+C1 & Cumple cond. & $\mathrm{SAR}_{\text{CRACS-T}} > \mathrm{SAR}_{\text{CRACS-R}}$ se cumple para $K \leq 100$ bajo avg/high y para $T_{300} \geq 10$~s en saturación. No se cumple bajo $T_{300}=5$~s a $K \geq 300$ ráfaga, valor que coincide con el por defecto del estándar (\cref{sec:res_e6,sec:res_e7}). \\
 C2 & Excede & $T_{\text{access, CRACS-T}}$ no solo no excede el $110\%$ de CRACS-R, sino que es del orden del $25$--$75\%$ del de CRACS-R en E0--E5 y en E6 hasta $K=300$; en E6\_burst y E6\_uniform a $K=1000$ se ubica en niveles cercanos a los de CRACS-R (\cref{tab:res_e1_k100,sec:res_e6}). \\
 C3 & Cumple & Tasa de identificación incorrecta de clúster (CID) $\leq 0{,}035$ con $\Delta d_{\min}=150$~m bajo distribución uniforme; clustering robusto a $\Delta d_{\min}$ en $[50, 1000]$~m (\cref{sec:res_e4}). \\
 C4 & Cumple & $\mathrm{PCR}_{\text{msg3, CRACS-T}} \approx 0$ frente a $\mathrm{PCR}_{\text{msg3, CRACS-R}} > 0$ debido a la asignación determinista de codebook por clúster (\cref{sec:res_e5}). \\
@@ -412,7 +402,5 @@ Cuantitativamente, los hallazgos centrales son: (i) CRACS-T redujo $T_{\text{acc
 
 Los resultados deben interpretarse a la luz de los supuestos de canal declarados en el \cref{ch:diseno} (condiciones ideales): pérdidas atmosféricas, FSPL y margen constantes (sin desvanecimiento, sin sombreado, sin centelleo, sin Doppler), antenas isotrópicas, un único satélite sin handover, y geometría LEO fija a $h_{\text{sat}}=600$~km, $\alpha_{\min}=40^\circ$. La cobertura computacional alcanzó $K=1000$ UEs por punto, frente a los $N=30\,000$ del caso nominal 3GPP TR~37.868 \cite{ref20}; el comportamiento más allá del rango simulado se declara como trabajo futuro. El detector probabilístico se evaluó únicamente en su punto calibrado ($p_{\text{det}}=0{,}975$, $p_{\text{fa}}=0{,}001$); su sensibilidad no fue barrida. El barrido $T_{300}$ cubrió tres valores del estándar $\{5, 10, 40\}$~s; valores adicionales del rango $\{2{,}5,\, 4,\, 6,\, 8\}$~s podrían refinar la posición exacta de la transición CRACS-T entre 5 y 10~s. Como limitación operativa explícita del esquema propuesto, CRACS-T requiere $T_{300} \geq 10$~s para mantener su dominancia en SAR sobre CRACS-R bajo tráfico ráfaga saturado; bajo el valor por defecto $T_{300}=5$~s (3GPP TS~36.331) la conjetura ex-ante de inclusión estricta deja de cumplirse, y CRACS-R es la opción de mejor SAR en ese punto operativo. La relación causal entre los efectos del esquema y el timer (en particular atribuir la transición a la saturación del clúster ToA, propuesta en \cref{sec:res_e7}) no se midió directamente y queda como hipótesis, apoyada en la correlación observada.
 
-\section{Cierre del capítulo}
 \label{sec:res_cierre}
-
-La fase experimental satisfizo cuatro de los cinco criterios de aceptación de diseño plenamente y el quinto (C1) de forma condicionalmente acotada al régimen de $T_{300}$, y reveló un hallazgo no anticipado: la sensibilidad de la dominancia CRACS-T/CRACS-R al temporizador RRC, que en la configuración por defecto del estándar invalida parcialmente la conjetura ex-ante. Estas observaciones, junto con las limitaciones declaradas, alimentan las conclusiones globales del trabajo y la línea de trabajo futuro presentadas en el capítulo siguiente.
+En síntesis, la fase experimental satisfizo cuatro de los cinco criterios de aceptación de diseño plenamente y el quinto (C1) de forma condicionalmente acotada al régimen de $T_{300}$, y reveló un hallazgo no anticipado: la sensibilidad de la dominancia CRACS-T/CRACS-R al temporizador RRC, que en la configuración por defecto del estándar invalida parcialmente la conjetura ex-ante. Estas observaciones, junto con las limitaciones declaradas, alimentan las conclusiones globales del trabajo y la línea de trabajo futuro presentadas en el capítulo siguiente.
