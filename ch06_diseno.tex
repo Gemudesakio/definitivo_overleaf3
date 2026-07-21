@@ -357,7 +357,7 @@ Todos los UEs del mismo clúster transmiten MSG3 sobre la misma capa SCMA asigna
 El eNB recibe la señal superpuesta y ejecuta el algoritmo MPA sobre el grafo de factores $\mathbf{F}_{4\times 6}$ (cuya estructura y propósito es separar las transmisiones SCMA superpuestas explotando la esparsidad del codebook se detallan en la \cref{sec:scma}). Por cada UE cuya transmisión sea decodificable, el eNB extrae el IMSI del payload y asigna un C-RNTI individual. MSG4 se envía sobre el TC-RNTI compartido pero contiene el IMSI y el C-RNTI específicos por UE, permitiendo que cada UE identifique su propia respuesta.
 
 \subsection*{Paso 5: Confirmación}
-Cada UE decodifica MSG4, identifica su IMSI en el payload, adopta el C-RNTI asignado y confirma con MSG5 (RRC Setup Complete). Los UEs que no recibieron respuesta (por colisión de piloto o fallo de MPA) entran en backoff y reintentan desde el paso 1.
+Cada UE decodifica MSG4, identifica su IMSI en el payload, adopta el C-RNTI asignado y confirma con MSG5. Los UEs que no recibieron respuesta (por colisión de piloto o fallo de MPA) entran en backoff y reintentan desde el paso 1.
 
 \subsection{Agrupamiento por tiempo de llegada}
 \label{sec:toa}
@@ -427,7 +427,7 @@ Fallo de decodificación & Ambos & MPA no logra separar las señales & No se env
 \end{tabularx}
 \end{table}
 
-Este procedimiento se aplica tanto en CRACS-R como en CRACS-T. Sin embargo, el caso de \emph{éxito directo} solo puede presentarse en CRACS-T, ya que la asignación de \textit{codebooks} mediante el agrupamiento por tiempo de llegada permite que algunos UEs sean los únicos ocupantes de una capa SCMA. En CRACS-R los \textit{codebooks} se seleccionan de forma aleatoria, por lo que la resolución de las colisiones depende con mayor frecuencia del algoritmo MPA.
+Este procedimiento se aplica tanto en CRACS-R como en CRACS-T. Sin embargo, el caso de éxito directo solo puede presentarse en CRACS-T, ya que la asignación de \textit{codebooks} mediante el agrupamiento por tiempo de llegada permite que algunos UEs sean los únicos ocupantes de una capa SCMA. En CRACS-R los \textit{codebooks} se seleccionan de forma aleatoria, por lo que la resolución de las colisiones depende con mayor frecuencia del algoritmo MPA.
 \section{SCMA y grafo de factores}
 \label{sec:scma}
 
