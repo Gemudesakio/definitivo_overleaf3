@@ -91,29 +91,79 @@ La configuración del simulador se realiza mediante parámetros de entrada, lo q
 \label{tab:impl_flags}
 \small
 \renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.4cm}@{}}
+
+\begin{tabularx}{\textwidth}{@{}
+>{\raggedright\arraybackslash}p{4.6cm}
+Y
+>{\raggedright\arraybackslash}p{2.4cm}
+@{}}
 \toprule
 \textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor de ref.} \\
 \midrule
-Esquema activo & Selecciona Legacy, CRACS-R o CRACS-T. & CRACS-R \\
-Semilla y \emph{run} de aleatoriedad & Reproducibilidad bit a bit. & 12345, 1 \\
-Máximo de arribos & Límite de UEs activos en la ventana de acceso ($0$ = ilimitado, sujeto a la tasa $\lambda$). & 0 \\
-Modelo de tráfico & Selecciona TM1 Poisson o TM2 Beta de 3GPP TR~37.868. & Poisson \\
-Preset de población y perfil & Población virtual y período (modo Poisson). & avg, 2h \\
-Horizonte $T$ de la ráfaga & Duración de la ráfaga sincronizada Beta$(3,4)$ (modo Beta). & 10~s \\
-Altitud orbital del satélite & Altitud LEO. & 600~km \\
-Elevación mínima de cobertura & Ángulo límite por debajo del cual el UE queda fuera de servicio. & 40\textdegree \\
-Pérdidas constantes del enlace & Atmosférica, espacio libre y margen. & 0,53 / 150 / 0,82~dB \\
-Detector probabilístico & Probabilidad de detección y de falsa alarma. & 0,975 / 0,001 \\
-Pool de preámbulos NPRACH & Tamaño barrido en el espacio lógico de 3,75~kHz, aplicado a los tres niveles CE simultáneamente. & 12 \\
-Separación mínima entre clústeres $\Delta d_{\min}$ & Resolución temporal efectiva del NPRACH. & 150~m \\
-Parámetros CRACS-R & Tamaño máximo de grupo SCMA y tamaño del catálogo de pilotos DMRS. & 2, 3 \\
-Temporizadores RRC T300 y de \emph{Connection Request} & Temporizador T300 del UE y \emph{timeout} del eNB. Valor estándar 5\,000~ms según 3GPP TS~36.331; E7\_t300 lo barre en $\{5\,000,\;10\,000,\;40\,000\}$~ms. & 5\,000 / 5\,000 \\
-Tiempo simulado total & Duración de cada simulación. & 120\,000~ms \\
+
+Esquema activo &
+Selecciona Legacy, CRACS-R o CRACS-T. &
+CRACS-R \\
+
+Semilla y número de ejecución &
+Reproducibilidad bit a bit. &
+12345, 1 \\
+
+Máximo de arribos &
+Límite de UEs activos en la ventana de acceso ($0$ = ilimitado, sujeto a la tasa $\lambda$). &
+0 \\
+
+Modelo de tráfico &
+Selecciona TM1 Poisson o TM2 Beta de 3GPP TR~37.868. &
+Poisson \\
+
+Preset de población y perfil &
+Población virtual y período (modo Poisson). &
+avg, 2h \\
+
+Horizonte $T$ de la ráfaga &
+Duración de la ráfaga sincronizada Beta$(3,4)$ (modo Beta). &
+10~s \\
+
+Altitud orbital del satélite &
+Altitud LEO. &
+600~km \\
+
+Elevación mínima de cobertura &
+Ángulo límite por debajo del cual el UE queda fuera de servicio. &
+40\textdegree \\
+
+Pérdidas constantes del enlace &
+Atmosférica, espacio libre y margen. &
+0,53 / 150 / 0,82~dB \\
+
+Detector probabilístico &
+Probabilidad de detección y de falsa alarma. &
+0,975 / 0,001 \\
+
+Pool de preámbulos NPRACH &
+Tamaño barrido en el espacio lógico de 3,75~kHz, aplicado a los tres niveles CE simultáneamente. &
+12 \\
+
+Separación mínima entre clústeres $\Delta d_{\min}$ &
+Resolución temporal efectiva del NPRACH. &
+150~m \\
+
+Parámetros CRACS-R &
+Tamaño máximo de grupo SCMA y tamaño del catálogo de pilotos DMRS. &
+2, 3 \\
+
+Temporizadores RRC T300 y de \emph{Connection Request} &
+Temporizador T300 del UE y \emph{timeout} del eNB. Valor estándar 5\,000~ms según 3GPP TS~36.331; E7\_t300 lo barre en $\{5\,000,\;10\,000,\;40\,000\}$~ms. &
+5\,000 / 5\,000 \\
+
+Tiempo simulado total &
+Duración de cada ejecución. &
+120\,000~ms \\
+
 \bottomrule
 \end{tabularx}
 \end{table}
-
 \newpage
 
 Los parámetros comunes controlan la geometría del escenario, el modelo de tráfico, las condiciones del canal y la semilla de aleatoriedad. Adicionalmente, cada esquema dispone de sus propios parámetros: CRACS-R configura el catálogo de recursos SCMA, mientras que CRACS-T incorpora el umbral de agrupamiento $\Delta d_{\min}$.
@@ -123,39 +173,47 @@ Los parámetros comunes controlan la geometría del escenario, el modelo de trá
 
 Los esquemas CRACS-R y CRACS-T incorporan módulos adicionales al procedimiento Legacy para implementar la detección de colisiones, el agrupamiento de usuarios y la resolución de las transmisiones recibidas en MSG3.
 
-\subsection{Detección de colisiones y agrupamiento}
+
+\subsection{Detector probabilístico de colisión}
 \label{sec:impl_detector}
 
-La primera etapa del procedimiento consiste en determinar si un preámbulo recibido corresponde a una transmisión individual o a una colisión. Cuando el esquema utilizado es CRACS-T y se detecta una colisión, los UEs involucrados se agrupan utilizando su distancia diferencial antes de construir las respuestas de acceso (RAR).
+El detector probabilístico constituye el primer componente específico incorporado para los esquemas CRACS-R y CRACS-T. Su función es determinar si un preámbulo NPRACH recibido por el eNB corresponde a una transmisión individual o a una colisión entre varios UEs. En lugar de modelar el procesamiento físico del NPRACH, el simulador representa el comportamiento del detector mediante un modelo probabilístico calibrado.
 
-El detector recibe como entrada el estado real de cada preámbulo observado por el eNB y genera una decisión binaria sobre la existencia de colisión. Cuando la colisión existe, se detecta con probabilidad $p_{\mathrm{det}}$; en caso contrario, puede producirse una falsa alarma con probabilidad $p_{\mathrm{fa}}$. De esta forma el simulador representa el comportamiento de un detector práctico sin modelar el procesamiento físico del NPRACH.
+El detector recibe como entrada el estado real de cada preámbulo observado por el eNB y genera una decisión binaria sobre la existencia de colisión. Cuando la colisión realmente existe, esta se detecta con probabilidad $p_{\mathrm{det}}$; cuando no existe, el detector puede generar una falsa alarma con probabilidad $p_{\mathrm{fa}}$. De esta manera, el simulador reproduce el comportamiento esperado de un detector práctico sin implementar las etapas de procesamiento de señal propias del receptor.
 
-El procedimiento implementado se resume en el \cref{alg:detector}.
+El funcionamiento del detector se resume en el \cref{alg:detector}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
 \caption{Detector probabilístico de colisión}
 \label{alg:detector}
+
 \KwIn{\texttt{actualCollision} (bool); \texttt{TPR}; \texttt{FPR}}
 \KwOut{\texttt{predictedCollision}}
 
 $u \leftarrow \mathrm{Uniform}(0,1)$\;
 
-\eIf{$\mathtt{actualCollision}$}{
-    $\mathtt{predictedCollision}\leftarrow(u<\mathtt{TPR})$\;
+\eIf{\texttt{actualCollision}}{
+    \texttt{predictedCollision} $\leftarrow (u < \texttt{TPR})$\;
 }{
-    $\mathtt{predictedCollision}\leftarrow(u<\mathtt{FPR})$\;
+    \texttt{predictedCollision} $\leftarrow (u < \texttt{FPR})$\;
 }
 
-\Return $\mathtt{predictedCollision}$\;
+\Return \texttt{predictedCollision}\;
 
 \end{algorithm}
 
-\noindent\textbf{Complejidad:} $O(1)$ por preámbulo evaluado.
+La salida del detector corresponde a una decisión binaria sobre la existencia de colisión. Cuando se detecta una colisión, el eNB activa el mecanismo de agrupamiento utilizado por CRACS-T para organizar los UEs involucrados. En caso contrario, el procedimiento continúa siguiendo el flujo convencional del acceso aleatorio.
 
-Cuando el detector confirma una colisión, CRACS-T agrupa los UEs utilizando su distancia diferencial. Primero se ordenan las distancias en forma ascendente y luego se forman nuevos clústeres cada vez que la separación supera el umbral $\Delta d_{\min}$. Todos los UEs pertenecientes a un mismo clúster reciben posteriormente el mismo identificador de clúster.
 
-El procedimiento se presenta en el \cref{alg:clustering}.
+\subsection{Agrupamiento por distancia diferencial}
+\label{sec:impl_clustering}
+
+Cuando el detector identifica una colisión, CRACS-T inicia el proceso de agrupamiento de los UEs involucrados. El objetivo de esta etapa es identificar subconjuntos de dispositivos cuyas diferencias de distancia respecto al satélite sean suficientemente pequeñas para compartir posteriormente los mismos recursos físicos durante la transmisión de MSG3.
+
+El procedimiento parte del conjunto de distancias diferenciales estimadas para los UEs participantes. En primer lugar, dichas distancias se ordenan de forma ascendente. Posteriormente, el algoritmo recorre la secuencia ordenada y crea un nuevo clúster cada vez que la separación entre dos elementos consecutivos supera el umbral $\Delta d_{\min}$. Todos los UEs pertenecientes a un mismo intervalo reciben el mismo identificador de clúster.
+
+El procedimiento implementado se presenta en el \cref{alg:clustering}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -193,14 +251,17 @@ $\mathtt{clusterId}[\mathtt{sortedIdx}[1]]\leftarrow0$\;
 
 \end{algorithm}
 
-\noindent\textbf{Complejidad:} $O(K\log K)$, dominada por el proceso de ordenamiento.
+Como resultado del procedimiento, cada UE queda asociado a un identificador de clúster de acuerdo con su distancia diferencial respecto al satélite. Esta información se utiliza posteriormente durante la resolución de las transmisiones MSG3 para asignar los recursos correspondientes a cada grupo y aplicar el mecanismo de acceso definido por CRACS-T.
 
 \subsection{Resolución de las transmisiones MSG3}
 \label{sec:impl_decision}
 
-Una vez finaliza la ventana de recepción de MSG3, el eNB analiza todas las transmisiones recibidas para determinar el resultado de cada UE. Para ello identifica las capas SCMA ocupadas y los pilotos DMRS utilizados. Con esta información establece si el mensaje puede aceptarse directamente, si existe una colisión de piloto o si es necesario aplicar el modelo del decodificador MPA para intentar separar las señales superpuestas.
+Una vez finaliza la ventana de recepción de MSG3, el eNB analiza todas las transmisiones recibidas para determinar el resultado de cada UE. Para ello identifica las capas SCMA ocupadas y los pilotos DMRS utilizados por cada transmisión. Con esta información establece si el mensaje puede aceptarse directamente, si existe una colisión de piloto o si es necesario aplicar el modelo probabilístico del decodificador MPA para intentar separar las señales superpuestas.
 
-El procedimiento implementado se resume en el \cref{alg:decision}.
+En primer lugar, el algoritmo contabiliza cuántos UEs utilizan cada combinación de capa SCMA y piloto DMRS, así como el número total de transmisiones asociadas a cada capa. Posteriormente evalúa individualmente cada transmisión. Si una capa SCMA está ocupada por un único UE, la transmisión se acepta directamente. Si varios UEs comparten simultáneamente la misma combinación de capa y piloto, la transmisión se clasifica como una colisión de piloto. En los casos restantes, el algoritmo consulta el modelo probabilístico del decodificador MPA para determinar si las señales pueden separarse correctamente.
+
+La lógica implementada se resume en el \cref{alg:decision}.
+
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -250,11 +311,16 @@ $\mathtt{decision}[t]\leftarrow(u<p_{\mathrm{BD}})
 
 \end{algorithm}
 
-\noindent\textbf{Complejidad:} $O(|\mathcal{T}|)$.
+Como resultado del procedimiento, cada transmisión MSG3 queda clasificada de acuerdo con su estado final. Las transmisiones aceptadas continúan el procedimiento de acceso, las colisiones de piloto se consideran irresolubles y las transmisiones restantes dependen del resultado del modelo probabilístico del decodificador MPA. Esta clasificación constituye la entrada para la etapa final de resolución implementada por el simulador.
 
-Cuando varias transmisiones comparten una misma capa SCMA sin presentar colisión de piloto, el simulador utiliza un modelo probabilístico para representar el comportamiento del algoritmo MPA. En lugar de implementar el proceso iterativo completo, el éxito de la decodificación se aproxima mediante una probabilidad que depende del número de UEs que ocupan simultáneamente la misma capa.
+\subsection{Modelo abstracto del decodificador MPA}
+\label{sec:impl_mpa}
 
-El modelo utilizado se presenta en el \cref{alg:mpa}.
+Cuando varias transmisiones comparten una misma capa SCMA sin presentar colisión de piloto, el simulador utiliza un modelo probabilístico para representar el comportamiento del algoritmo MPA. En lugar de implementar el proceso iterativo completo del decodificador, el éxito de la separación se aproxima mediante una probabilidad que depende de la densidad efectiva de usuarios sobre la capa evaluada.
+
+El modelo recibe como entrada el valor $d_c$, que representa el número efectivo de transmisiones superpuestas sobre una misma capa SCMA. Para valores bajos de $d_c$, la probabilidad de decodificación se mantiene cercana a uno. A medida que aumenta la cantidad de usuarios superpuestos, esta probabilidad disminuye de forma progresiva para representar la degradación esperada en el proceso de separación.
+
+El modelo probabilístico utilizado por el simulador se presenta en el \cref{alg:mpa}.
 
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -279,7 +345,8 @@ El modelo utilizado se presenta en el \cref{alg:mpa}.
 \lCase{$5$}{$p_{\mathrm{BD}}\leftarrow0.70$}
 
 \lOther{$p_{\mathrm{BD}}\leftarrow
-\max\!\left(0.05,\,
+\max\!\left(
+0.05,\,
 0.70\,e^{-0.5(d_c-5)}
 \right)$}
 
@@ -289,7 +356,9 @@ El modelo utilizado se presenta en el \cref{alg:mpa}.
 
 \end{algorithm}
 
-La probabilidad de éxito disminuye a medida que aumenta el número de UEs que comparten una misma capa SCMA. La forma de esta curva ---valor cercano a la unidad para cargas bajas y decaimiento progresivo al aumentar la sobrecarga--- es coherente con la tolerancia a la sobrecarga reportada experimentalmente para SCMA, verificada hasta un $300\,\%$ con una degradación de rendimiento despreciable frente a la transmisión ortogonal~\cite{ref44}. Esta aproximación reproduce el comportamiento esperado del algoritmo MPA con un costo computacional mucho menor que el de implementar el decodificador iterativo completo, por lo que resulta adecuada para simulaciones a nivel de sistema.
+El valor obtenido representa la probabilidad de decodificación exitosa para la transmisión evaluada. Esta probabilidad se utiliza en la lógica de resolución de MSG3 para decidir si las señales superpuestas pueden separarse correctamente o si la transmisión se clasifica como fallida.
+
+La probabilidad de éxito disminuye a medida que aumenta el número de UEs que comparten una misma capa SCMA. La forma de esta curva con valores cercanos a la unidad para cargas bajas y una reducción progresiva al aumentar la sobrecarga es coherente con la tolerancia a la sobrecarga reportada experimentalmente para SCMA, verificada hasta un $300\,\%$ con una degradación de rendimiento despreciable frente a la transmisión ortogonal~\cite{ref44}. Esta aproximación reproduce el comportamiento esperado del algoritmo MPA sin implementar el decodificador iterativo completo, por lo que resulta adecuada para simulaciones a nivel de sistema.
 
 \subsection{Configuración experimental}
 \label{sec:impl_configuracion}
@@ -300,7 +369,7 @@ Las variantes \emph{\_high} repiten el escenario base bajo un perfil de tráfico
 
 Cada combinación de parámetros se ejecuta con 30 semillas independientes y un tiempo de simulación de $T_{\mathrm{sim}}=120$~s. Los resultados se presentan como la media y su intervalo de confianza al 95\%, calculado mediante la distribución $t$ de Student.
 
-Durante cada ejecución el simulador registra los eventos del procedimiento de acceso y genera archivos en formato CSV con la información necesaria para calcular los KPIs definidos en el Capítulo~3. Posteriormente, los resultados de todas las corridas se consolidan para construir las curvas y tablas presentadas en el capítulo de resultados. La comparación entre esquemas se realiza mediante la prueba de rangos con signo de Wilcoxon.
+Durante cada ejecución el simulador registra los eventos del procedimiento de acceso y genera archivos en formato CSV con la información necesaria para calcular los KPIs definidos en el Capítulo~3. Posteriormente, los resultados de todas las simulaciones se consolidan para construir las curvas y tablas presentadas en el capítulo de resultados. La comparación entre esquemas se realiza mediante la prueba de rangos con signo de Wilcoxon.
 
 \section{Validación de la implementación}
 \label{sec:impl_validacion}
