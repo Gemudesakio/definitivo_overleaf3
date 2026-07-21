@@ -74,12 +74,12 @@ Las diferencias entre esquemas se contrastan con la prueba de Wilcoxon de rangos
 
 Para cuantificar la sensibilidad a outliers se aplica la regla de Tukey $1{,}5\cdot$IQR sobre las $30$ muestras por celda: una observación se clasifica como outlier si cae fuera del intervalo $[Q_1 - 1{,}5\cdot\text{IQR},\, Q_3 + 1{,}5\cdot\text{IQR}]$, criterio idéntico al empleado por el diagrama de cajas estándar de MATLAB y matplotlib. El análisis completo se detalla en la \cref{sec:res_e1_outliers} (\cref{tab:res_outliers}); los outliers detectados —hasta un $10\%$ de las muestras en los puntos más cargados— corresponden mayoritariamente a UEs que sufrieron varios reintentos consecutivos. Son datos reales que representan la cola legítima del proceso de acceso, no errores de medición; por ello se conservan en el análisis y se reportan por transparencia.
 
-Para validar la asunción gaussiana del IC $t$-Student se calculó un IC al $95\%$ por bootstrap percentile (10\,000 réplicas con reemplazo sobre las 30 semillas, semilla $42$). La \cref{tab:res_bootstrap} contrasta ambos métodos en cuatro puntos de operación críticos. La coincidencia entre los anchos de los IC (diferencia $\leq 8\%$) indica que el reporte basado en $t$-Student no se ve afectado significativamente por la asunción de normalidad para los puntos de operación considerados.
+Para validar la asunción gaussiana del IC $t$-Student se calculó un IC al $95\%$ por bootstrap percentile (10\,000 réplicas con reemplazo sobre las 30 semillas, semilla $42$). La \cref{tab:res_bootstrap} contrasta ambos métodos en cuatro puntos de operación críticos; las filas ``E6\_burst $K{=}300$'' y ``E7\_t300 $T_{300}{=}5$~s'' corresponden a la misma configuración de tráfico (ráfaga Beta$(3,4)$, $K{=}300$, $T_{300}{=}5$~s) y se incluyen como verificación cruzada de la reproducibilidad, no como dos experimentos independientes. La coincidencia entre los anchos de los IC (diferencia $\leq 8\%$) indica que el reporte basado en $t$-Student no se ve afectado significativamente por la asunción de normalidad para los puntos de operación considerados.
 
 % --- Tabla 9.VI: bootstrap CI vs t-Student CI ---
 \begin{table}[H]
 \centering
-\caption{Comparación del IC al 95\,\% por $t$-Student y por bootstrap percentile (10\,000 réplicas) para SAR en cuatro puntos de operación críticos. La coincidencia entre ambos métodos indica robustez del análisis frente a la asunción de normalidad. Las filas ``E6\_burst $K{=}300$'' y ``E7\_t300 $T_{300}{=}5$~s'' corresponden a la misma configuración de tráfico (ráfaga Beta$(3,4)$, $K{=}300$, $T_{300}{=}5$~s) y se incluyen como verificación cruzada de la reproducibilidad, no como dos experimentos independientes.}
+\caption{Comparación del IC al 95\,\% por $t$-Student y por bootstrap percentile (10\,000 réplicas) para SAR en cuatro puntos de operación críticos.}
 \label{tab:res_bootstrap}
 \small
 \renewcommand{\arraystretch}{1.1}
@@ -198,12 +198,12 @@ La \cref{fig:res_box_taccess} complementa la \cref{fig:res_taccess} mostrando la
 \subsection{Análisis de outliers y robustez del análisis}
 \label{sec:res_e1_outliers}
 
-Para cuantificar la sensibilidad del análisis a los outliers observados se aplicó la regla de Tukey $1{,}5\cdot$IQR a las 30 muestras de cada celda en seis puntos de operación clave. La \cref{tab:res_outliers} reporta el conteo de outliers, la fracción sobre el total, y la media calculada con y sin ellos.
+Para cuantificar la sensibilidad del análisis a los outliers observados se aplicó la regla de Tukey $1{,}5\cdot$IQR a las 30 muestras de cada celda en seis puntos de operación clave. La \cref{tab:res_outliers} reporta el conteo de outliers, la fracción sobre el total, y la media calculada con y sin ellos, indicada en la columna $\Delta\%$: el cambio relativo de la media al excluir los outliers, definido como $\Delta\% = 100 \cdot (\bar{x}_{\text{excl}} - \bar{x})/\bar{x}$, donde valores con magnitud pequeña indican robustez del análisis. El KPI evaluado varía según el escenario: $T_{\text{access}}$ medio (ms) para E1, E1\_high, E6\_burst y E6\_uniform; SAR (adimensional) para E7\_t300.
 
 % --- Tabla 9.V: outliers Tukey 1.5*IQR ---
 \begin{table}[H]
 \centering
-\caption{Análisis de outliers (regla de Tukey $1{,}5\cdot$IQR) en seis puntos de operación clave. La columna $\Delta\%$ es el cambio relativo de la media al excluir los outliers, definido como $\Delta\% = 100 \cdot (\bar{x}_{\text{excl}} - \bar{x})/\bar{x}$; valores con magnitud pequeña indican robustez del análisis. El KPI evaluado se indica en la primera columna: $T_{\text{access}}$ medio (ms) para los escenarios E1, E1\_high, E6\_burst y E6\_uniform; SAR (adimensional) para los escenarios E7\_t300.}
+\caption{Análisis de outliers (regla de Tukey $1{,}5\cdot$IQR) en seis puntos de operación clave.}
 \label{tab:res_outliers}
 \small
 \renewcommand{\arraystretch}{1.1}
@@ -297,7 +297,7 @@ A pesar de la inversión en SAR, CRACS-T conservó ventaja en latencia bajo carg
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig910_boxplot_sar_e6burst.pdf}
-\caption{Distribución de SAR por esquema bajo ráfaga Beta($3,4$) (E6\_burst) a las cuatro cargas $K$. Las cajas muestran $Q_1$--$Q_3$, la línea central la mediana, los bigotes el rango Tukey $1{,}5\cdot$IQR y las cruces rojas los outliers individuales. A $K{=}300$ la caja de CRACS-R se sitúa por encima de la de CRACS-T (Wilcoxon $p=3{,}5\times10^{-8}$, $n=30$), lo que confirma la inversión H1 como un hecho distribucional y no como un artefacto de las medias.}
+\caption{Distribución de SAR por esquema bajo ráfaga Beta($3,4$) (E6\_burst) a las cuatro cargas $K$. Las cajas muestran $Q_1$--$Q_3$, la línea central la mediana, los bigotes el rango Tukey $1{,}5\cdot$IQR y las cruces rojas los outliers individuales.}
 \label{fig:res_box_e6burst}
 \end{figure}
 
@@ -315,7 +315,7 @@ Como la inversión de SAR contradice la dirección de la hipótesis ex-ante, ant
 
 \begin{table}[H]
 \centering
-\caption{Prueba de control en E6\_burst $K=300$ ($n=6$ semillas): tasa de acceso (SAR) con el $T_{300}$ por defecto ($5$~s) y con un valor alto ($60$~s). El orden entre CRACS-R y CRACS-T se invierte al cambiar el temporizador.}
+\caption{Prueba de control en E6\_burst $K=300$ ($n=6$ semillas): tasa de acceso (SAR) con el $T_{300}$ por defecto ($5$~s) y con un valor alto ($60$~s).}
 \label{tab:res_ab_t300}
 \small
 \renewcommand{\arraystretch}{1.15}
@@ -356,7 +356,7 @@ La consecuencia para la hipótesis ex-ante es la siguiente: la inclusión estric
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\linewidth]{fig911_boxplot_sar_t300.pdf}
-\caption{Distribución de SAR por esquema en función de $T_{300}$ (E6\_burst $K{=}300$). Las cajas confirman la transición de CRACS-T entre 5 y 10~s como un salto distribucional de la mediana y la caja completa, no solo de la media; el comportamiento plano de CRACS-R y la curva en U de Legacy son igualmente visibles a nivel distribucional.}
+\caption{Distribución de SAR por esquema en función de $T_{300}$ (E6\_burst $K{=}300$).}
 \label{fig:res_box_t300}
 \end{figure}
 
