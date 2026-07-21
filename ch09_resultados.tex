@@ -65,7 +65,7 @@ Para cada celda (escenario, esquema, valor barrido) se reporta la media muestral
 \]
 donde $s$ es la desviación estándar muestral. La aproximación es válida en virtud del Teorema del Límite Central, que aplica a la media de las $n=30$ muestras independientes incluso cuando la distribución subyacente del KPI no es gaussiana. En la \cref{sec:res_config_outliers} se reporta además un IC bootstrap percentile como verificación independiente.
 
-Las métricas de latencia ($T_{\text{access}}$, $T_{\text{inst}}$, TST) presentan distribuciones con cola larga: unos pocos UEs sufren múltiples reintentos y producen valores muy por encima del promedio. La media muestral es sensible a esta cola; la mediana y los percentiles no \cite{ref34}. Por ello $T_{\text{access}}$ se reporta simultáneamente como media, mediana ($p50$) y percentil $95$ ($p95$): la media captura el agregado, la mediana captura el comportamiento típico y el $p95$ acota el peor caso de la cola. Adicionalmente, el SDP(T) (probabilidad de éxito antes de $T$~s, normalizada por el total de UEs) y la TST (\emph{makespan} de la oleada de acceso, es decir, el conjunto de UEs activos en la ventana de simulación) son métricas distribucionales, robustas por construcción a outliers individuales. Las curvas de $\mathrm{SDP}(T)$ vs.\ $K$ (\cref{fig:res_sdp}) y los diagramas de caja de $T_{\text{access}}$ por punto operativo (\cref{fig:res_box_taccess} y siguientes) permiten observar la distribución de cada KPI más allá del estadístico de resumen único.
+Las métricas de latencia ($T_{\text{access}}$, $T_{\text{inst}}$, TST) presentan distribuciones con cola larga (\cref{fig:res_box_taccess}): unos pocos UEs sufren múltiples reintentos y producen valores muy por encima del promedio. La media muestral es sensible a esta cola; la mediana y los percentiles no \cite{ref34}. Por ello $T_{\text{access}}$ se reporta simultáneamente como media, mediana ($p50$) y percentil $95$ ($p95$): la media captura el agregado, la mediana captura el comportamiento típico y el $p95$ acota el peor caso de la cola. Adicionalmente, el SDP(T) (probabilidad de éxito antes de $T$~s, normalizada por el total de UEs) y la TST (\emph{makespan} de la oleada de acceso, es decir, el conjunto de UEs activos en la ventana de simulación) son métricas distribucionales, robustas por construcción a outliers individuales. Las curvas de $\mathrm{SDP}(T)$ vs.\ $K$ (\cref{fig:res_sdp}) y los diagramas de caja de $T_{\text{access}}$ por punto operativo (\cref{fig:res_box_taccess} y siguientes) permiten observar la distribución de cada KPI más allá del estadístico de resumen único.
 
 Las diferencias entre esquemas se contrastan con la prueba de Wilcoxon de rangos con signo \cite{ref34}, una prueba no paramétrica que no requiere normalidad de los datos y que es robusta frente a outliers. Se reporta una diferencia como estadísticamente significativa cuando $p<0{,}05$. La elección de Wilcoxon sobre $t$-pareado se justifica por dos razones: (i) varias métricas saturan cerca de $1{,}0$ (SAR en regímenes moderados), lo que produce distribuciones de diferencias claramente no gaussianas; (ii) las pruebas no paramétricas son la convención en estudios system-level de NB-IoT \cite{ref24,ref25}.
 
@@ -171,12 +171,12 @@ $\mathrm{SDP}(3\text{~s})$ combina confiabilidad y latencia en una sola cifra (\
 \toprule
 & \textbf{SAR} & $\boldsymbol{\mathrm{SAR}_{1}}$ & $\boldsymbol{T_{\text{acc}}}$ \textbf{(ms)} & $\boldsymbol{T_{\text{acc}}^{p95}}$ & \textbf{SDP(3 s)} \\
 \midrule
-\multicolumn{6}{c}{\textit{Perfil avg} ($\lambda \approx 7{,}3$~UEs/s)} \\
+\multicolumn{6}{c}{\textbf{Perfil avg} ($\lambda \approx 7{,}3$~UEs/s)} \\
 Legacy  & $0{,}903$ & $0{,}232$ & $8\,651{,}6$ & $24\,070$ & $0{,}323$ \\
 CRACS-R & $0{,}996$ & $0{,}444$ & $2\,510{,}5$ & $6\,315$  & $0{,}672$ \\
 CRACS-T & $1{,}000$ & $0{,}948$ & $\mathbf{638{,}4}$ & $\mathbf{1\,329}$ & $\mathbf{0{,}994}$ \\
 \midrule
-\multicolumn{6}{c}{\textit{Perfil high} ($\lambda \approx 27{,}8$~UEs/s)} \\
+\multicolumn{6}{c}{\textbf{Perfil high} ($\lambda \approx 27{,}8$~UEs/s)} \\
 Legacy  & $0{,}825$ & $0{,}162$ & $11\,961{,}7$ & $26\,205$ & $0{,}185$ \\
 CRACS-R & $1{,}000$ & $0{,}382$ & $3\,531{,}3$  & $7\,096$  & $0{,}467$ \\
 CRACS-T & $1{,}000$ & $0{,}500$ & $\mathbf{2\,682{,}7}$ & $\mathbf{6\,259}$ & $\mathbf{0{,}602}$ \\
@@ -195,7 +195,7 @@ La conjetura de inclusión \emph{ex-ante} se cumple en este régimen: $\Omega_{\
 
 La \cref{fig:res_box_taccess} complementa la \cref{fig:res_taccess} mostrando la distribución completa de las 30 muestras por esquema. Las cajas muestran $Q_1$--$Q_3$; la línea central, la mediana; los bigotes, el rango Tukey $1{,}5\cdot$IQR; y las cruces rojas, los outliers individuales (UEs con múltiples reintentos) — convención que se reutiliza en los siguientes diagramas de caja del capítulo. Se desprenden tres observaciones cuantitativas: (i) bajo perfil avg, la mediana de CRACS-T es 3,6 veces menor que la de CRACS-R y 11,7 veces menor que la de Legacy; bajo perfil high, 1,7 veces menor que CRACS-R y 5,6 veces menor que Legacy (medianas calculadas sobre las 30 semillas a $K=100$); (ii) las cajas de Legacy presentan asimetría hacia arriba (cola larga superior) consistente con la distancia entre su media y su mediana reportada en \cref{tab:res_e1_k100}; (iii) los outliers visibles en Legacy y, en menor medida, en CRACS-R caen por encima del cuartil superior, comportamiento consistente con simulaciones donde un subconjunto de UEs requirió retransmisiones adicionales. No fue posible confirmar, a nivel de UE individual, si estos outliers corresponden a UEs con múltiples reintentos, ya que el análisis se realizó sobre datos agregados por semilla, no por trayectoria de UE.
 
-\subsection{Análisis de outliers y robustez del análisis}
+\subsection{Análisis de sensibilidad a outliers (E1)}
 \label{sec:res_e1_outliers}
 
 Para cuantificar la sensibilidad del análisis a los outliers observados se aplicó la regla de Tukey $1{,}5\cdot$IQR a las 30 muestras de cada celda en seis puntos de operación clave. La \cref{tab:res_outliers} reporta el conteo de outliers, la fracción sobre el total, y la media calculada con y sin ellos, indicada en la columna $\Delta\%$: el cambio relativo de la media al excluir los outliers, definido como $\Delta\% = 100 \cdot (\bar{x}_{\text{excl}} - \bar{x})/\bar{x}$, donde valores con magnitud pequeña indican robustez del análisis. El KPI evaluado varía según el escenario: $T_{\text{access}}$ medio (ms) para E1, E1\_high, E6\_burst y E6\_uniform; SAR (adimensional) para E7\_t300.
